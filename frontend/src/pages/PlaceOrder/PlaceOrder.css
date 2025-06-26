@@ -33,3 +33,35 @@
 .place-order .cart-total button{
     margin-top: 30px;
 }
+
+.payment{
+    margin-top: 10px;
+}
+
+.payment-type {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    background-color: #fafafa;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    gap: 10px;
+    width: 100%;
+    max-width: 300px;
+}
+
+.payment-type label {
+    margin-left: 8px;
+    font-size: 16px;
+    color: #444;
+    cursor: pointer;
+}
+
+.payment-type input[type="radio"] {
+    cursor: pointer;
+}
+
+.payment-type label:hover {
+    color: tomato;
+}

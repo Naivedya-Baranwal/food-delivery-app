@@ -24,12 +24,11 @@ const addToCart = async (req, res) => {
 const removeFromCart = async (req, res) => {
     try {
         let userData = await userModel.findById(req.body.userId);
-        // let cartData = {...userData.cartData}; //for mutation issue created a shallow copy (new object for cartData in memory)
-        let cartData = await userData.cartData;
+          let cartData = await userData.cartData;
         if (cartData[req.body.itemId] > 0) {
             cartData[req.body.itemId] -= 1;
             if (cartData[req.body.itemId] === 0) {
-                delete cartData[req.body.itemId]; // Remove key when quantity is zero
+                delete cartData[req.body.itemId]; 
             }
         }
         await userModel.findByIdAndUpdate(req.body.userId, { cartData });

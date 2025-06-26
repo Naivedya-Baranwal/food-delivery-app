@@ -30,6 +30,8 @@ const Orders = ({url}) => {
 
   useEffect(()=>{
     fetchAllOrders();
+    const interval = setInterval(fetchAllOrders,5000);
+    return ()=> clearInterval(interval);
   },[]);
 
   return (

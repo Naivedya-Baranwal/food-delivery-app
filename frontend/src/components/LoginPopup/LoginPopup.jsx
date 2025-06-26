@@ -15,10 +15,7 @@ function LoginPopup({setShowLogin}) {
     })
 
     useEffect(() => {
-        // Prevent scrolling
         document.body.style.overflow = 'hidden';
-    
-        // Re-enable scrolling on cleanup
         return () => {
             document.body.style.overflow = 'auto';
         };

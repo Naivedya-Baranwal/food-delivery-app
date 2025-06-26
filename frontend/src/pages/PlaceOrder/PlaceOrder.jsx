@@ -1,72 +1,91 @@
 import React, { useContext, useEffect, useState } from 'react'
 import axios from 'axios';
+import {toast} from 'react-toastify';
 import './PlaceOrder.css'
 import { StoreContext } from '../../context/StoreContext'
 import { useNavigate } from 'react-router-dom';
 
 function PlaceOrder() {
 
-  const { getTotalCartAmount,token,food_list,cartItems,url } = useContext(StoreContext);
-
-  const [data,setData]= useState({
-    firstName:"",
-    lastName:"",
-    email:"",
-    street:"",
-    city:"",
-    state:"",
-    zipcode:"",
-    country:"",
-    phone:""
+  const { getTotalCartAmount, token, food_list, cartItems, url, setCartItems } = useContext(StoreContext);
+  const [paymentMethod, setPaymentMethod] = useState("COD");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const [data, setData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    street: "",
+    city: "",
+    state: "",
+    zipcode: "",
+    country: "",
+    phone: ""
   })
 
-  const onChangeHandler = (event) =>{
+  const onChangeHandler = (event) => {
     const name = event.target.name;
     const value = event.target.value;
-    setData(data=>({...data,[name]:value})) 
+    setData(data => ({ ...data, [name]: value }))
   }
 
-  const placeOrder = async (event)=>{
-        event.preventDefault(); // page doesn't reload after submitting the form
-        let orderItems = [];
-        food_list.map((item)=>{
-          if(cartItems[item._id]>0){
-            let itemInfo = item;
-            itemInfo["quantity"] = cartItems[item._id];
-            orderItems.push(itemInfo);
-          }
-        })
-        let orderData = {
-          address  : data,
-          items : orderItems,
-          amount : getTotalCartAmount()+20,
+  const placeOrder = async (event) => {
+    event.preventDefault();
+    let orderItems = [];
+    food_list.map((item) => {
+      if (cartItems[item._id] > 0) {
+        let itemInfo = { ...item, quantity: cartItems[item._id] };
+        orderItems.push(itemInfo);
+      }
+    })
+    let orderData = {
+      address: data,
+      items: orderItems,
+      amount: getTotalCartAmount() + 20,
+      paymentMethod,
+    }
+    try {
+      setLoading(true);
+       let response = await axios.post(url + "/api/order/place", orderData, { headers: { token } });
+       if (response.data.success) {
+        if (response.data.cod) {
+          toast.success("Order placed successfully (COD)");
+          setCartItems({}); 
+          setTimeout(() => {
+            setLoading(false);
+            navigate("/myorders"); 
+          }, 1000);
+        } else {
+          window.location.replace(response.data.session_url);
         }
-        let response = await axios.post(url+"/api/order/place",orderData,{headers:{token}});
-        if(response.data.success){
-          const {session_url} = response.data;
-          window.location.replace(session_url);
-        }
-        else {
-          alert("Error");
-        }
+      } else {
+        toast.error("Failed to place order");
+      }
+    } catch (error) {
+      toast.error("Something went wrong");
+      console.error(error);
+    }
   }
 
-  const navigate = useNavigate();
-  useEffect(()=>{
-  if(!token){
-   navigate('/cart'); 
-  }
-  else if(getTotalCartAmount()===0){
-    navigate('/cart');
-  }
-  },[token])
+  useEffect(() => {
+    if (!token || getTotalCartAmount() === 0) {
+      navigate('/cart');
+    }
+  }, [token]);
 
+  if (loading) {
+    return (
+      <div className="verify">
+        <div className="spinner"></div>
+      </div>
+    );
+  }
   return (
     <form onSubmit={placeOrder} className='place-order'>
       <div className="place-order-left">
         <p className="title">Delivery Information</p>
         <div className="multi-fields">
-          <input  required name = 'firstName' onChange={onChangeHandler} value={data.firstName} placeholder='First name' type="text" />
+          <input required name='firstName' onChange={onChangeHandler} value={data.firstName} placeholder='First name' type="text" />
           <input required name='lastName' onChange={onChangeHandler} value={data.lastName} placeholder='Last name' type="text" />
         </div>
         <input required name='email' onChange={onChangeHandler} value={data.email} type="email" placeholder='Email address' />
@@ -86,22 +105,48 @@ function PlaceOrder() {
         <div className="cart-total">
           <h2>Cart Totals</h2>
           <div>
-          <div className="cart-total-details">
+            <div className="cart-total-details">
               <p>Subtotal</p>
               <p>₹{getTotalCartAmount()}</p>
             </div>
             <hr />
             <div className="cart-total-details">
               <p>Delivery Fee</p>
-              <p>₹{getTotalCartAmount()===0?0:20}</p>
+              <p>₹{getTotalCartAmount() === 0 ? 0 : 20}</p>
             </div>
             <hr />
             <div className="cart-total-details">
               <b>Total</b>
-              <b>₹{getTotalCartAmount()===0?0:getTotalCartAmount()+20}</b>
+              <b>₹{getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 20}</b>
             </div>
           </div>
-          <button type='submit'>PROCEED TO PAYMENT</button>
+          <p className='payment'>Payment Method</p>
+          <div className='payment-type'>
+            <div>
+            <input
+              type="radio"
+              name="payment"
+              id="COD"
+              value="COD"
+              checked={paymentMethod === "COD"}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            />
+            <label htmlFor="COD">Cash on Delivery</label>
+          
+            </div>
+           <div>
+           <input
+              type="radio"
+              name="payment"
+              id="credit-card"
+              value="Online"
+              checked={paymentMethod === "Online"}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            />
+            <label htmlFor="credit-card">Stripe (Credit/Debit)</label>
+           </div>
+               </div>
+          <button type='submit'>Place Order</button>
         </div>
       </div>
     </form>

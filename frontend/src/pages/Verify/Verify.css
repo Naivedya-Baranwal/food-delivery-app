@@ -1,20 +1,22 @@
-.verify{
-    margin-top: 50px;
-    min-height: 60vh;
-    display: grid;
-}
-
-.verify .spinner{
-    width: 100px;
-    height: 100px;
-    place-self: center;
-    border: 5px solid #bdbdbd;
+.verify {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid #ccc;
     border-top-color: tomato;
     border-radius: 50%;
-    animation: rotate 1s infinite;
-}
-@keyframes rotate {
-    100%{
-        transform: rotate(360deg);
+    animation: spin 0.8s linear infinite;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
     }
-}
+  }
+  

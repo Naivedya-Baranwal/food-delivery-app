@@ -6,7 +6,7 @@ function Footer() {
         <div className='footer' id='footer'>
             <div className="footer-content">
                 <div className="footer-content-left">
-                    <img src={assets.logo1} alt="" />
+                    <img src={assets.logoDark} alt="" />
                     <p style={{wordSpacing:"2px"}}> <b>Naivedyam Now</b>  brings delicious meals from your favorite local restaurants straight to your doorstep. Enjoy great food, quick service, and hassle-free ordering—anytime, anywhere.</p>
                     <div className="footer-social-icons">
                         <img src={assets.facebook_icon} alt="" />
