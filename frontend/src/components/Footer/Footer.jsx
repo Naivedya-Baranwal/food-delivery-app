@@ -7,7 +7,7 @@ function Footer() {
             <div className="footer-content">
                 <div className="footer-content-left">
                     <img src={assets.logo1} alt="" />
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit vel accusamus, ipsum expedita, aperiam ut necessitatibus incidunt animi aspernatur quas quia ullam, voluptate voluptatem nihil cumque harum consequatur neque at.</p>
+                    <p style={{wordSpacing:"2px"}}> <b>Naivedyam Now</b>  brings delicious meals from your favorite local restaurants straight to your doorstep. Enjoy great food, quick service, and hassle-free ordering—anytime, anywhere.</p>
                     <div className="footer-social-icons">
                         <img src={assets.facebook_icon} alt="" />
                         <img src={assets.twitter_icon} alt="" />
@@ -26,13 +26,13 @@ function Footer() {
                 <div className="footer-content-right">
                     <h2>GET IN TOUCH</h2>
                     <ul>
-                        <li>+1-345-234-4564</li>
-                        <li>contact@tomato.com</li>
+                        <li>+1-235-435-2454</li>
+                        <li>contact@naivedyam.com</li>
                     </ul>
                 </div>
             </div>
             <hr />
-            <p className="footer-copyright">Copyright 2025 © Tomato.com - All Right Reserved</p>
+            <p className="footer-copyright">Copyright 2025 © Naivedyam.com - All Right Reserved</p>
         </div>
     )
 }
