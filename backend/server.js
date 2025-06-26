@@ -6,7 +6,7 @@ import userRouter from "./routes/userRoute.js";
 import 'dotenv/config'
 import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
-// import uploads from './uploads'
+
 
 
 // app config
@@ -35,5 +35,5 @@ app.listen(port,()=>{
     console.log(`Server listening to http://localhost:${port}`)
 })
 
-//mongodb+srv://naivedyab198:4nNSAwe9KAra7d0U@cluster0.ywbfp.mongodb.net/?
+
 
