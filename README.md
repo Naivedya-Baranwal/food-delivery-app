@@ -2,6 +2,12 @@
 
 A full-stack Food Delivery Web App designed to empower small-scale restaurants with a dedicated online ordering platform. Built using the **MERN stack** (MongoDB, Express.js, React.js, Node.js), this project ensures a seamless experience for both customers and restaurant administrators.
 
+
+## 🌐 Live Demo
+
+- 👨‍🍳 [User Frontend](https://food-delivery-app-frontend-rzxm.onrender.com)
+- 🧑‍💼 [Admin Panel](https://food-delivery-app-admin-58ts.onrender.com)
+
 ## 🚀 Features
 
 ### 👨‍🍳 User Module
