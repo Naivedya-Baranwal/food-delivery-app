@@ -9,8 +9,7 @@ A full-stack Food Delivery Web App designed to empower small-scale restaurants w
 > As a result, the first request may take **15–60 seconds** to respond while the server wakes up. Subsequent requests will be fast.  
 > Please wait a few moments after opening the app — it will start working shortly.
 
-- 👨‍🍳 [User Frontend](https://food-delivery-app-frontend-rzxm.onrender.com)
-- 🧑‍💼 [Admin Panel](https://food-delivery-app-admin-58ts.onrender.com)
+- 👨‍🍳 [Live Link](https://food-delivery-app-frontend-rzxm.onrender.com)
 
 
 ## 🚀 Features
