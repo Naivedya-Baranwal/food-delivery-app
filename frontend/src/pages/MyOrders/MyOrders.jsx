@@ -1,4 +1,4 @@
-import React, { useState,useContext, useEffect } from 'react'
+import { useState,useContext, useEffect } from 'react'
 import './MyOrders.css'
 import { StoreContext } from '../../context/StoreContext'
 import axios from 'axios';
@@ -18,7 +18,6 @@ const MyOrders = () => {
     useEffect(() => {
         if (token) {
             fetchOrders(); 
-    
             const interval = setInterval(() => {
                 fetchOrders(); 
             }, 5000); 

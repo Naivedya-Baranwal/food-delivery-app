@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './Dashboard.css';
 import axios from 'axios';
 import { toast } from 'react-toastify';

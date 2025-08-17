@@ -11,7 +11,7 @@ A full-stack Food Delivery Web App designed to empower small-scale restaurants w
 ## 🌐 Live Demo
 
 > ⚠️ **Note:** The app is hosted on [Render's free tier](https://render.com/), which puts the backend servers to sleep after 15 minutes of inactivity.  
-> As a result, the first request may take **15–60 seconds** to respond while the server wakes up. Subsequent requests will be fast.  
+> As a result, the first request may take **30–60 seconds** to respond while the server wakes up. Subsequent requests will be fast.  
 > Please wait a few moments after opening the app — it will start working shortly.
 
 - 👨‍🍳 [Live Link](https://food-delivery-app-frontend-rzxm.onrender.com)
@@ -34,6 +34,7 @@ A full-stack Food Delivery Web App designed to empower small-scale restaurants w
 - JWT for protected routes and session management
 - Passwords hashed with **bcrypt**
 - Stripe integration for secure and efficient payment processing
+- Cloudinary integration for storing images in the cloud, ensuring fast delivery via CDN and efficient     storage management
 
 ## 🛠️ Technologies Used
 
@@ -44,6 +45,7 @@ A full-stack Food Delivery Web App designed to empower small-scale restaurants w
 | Database     | MongoDB Atlas                    |
 | Authentication | JSON Web Tokens (JWT), bcrypt  |
 | Payments     | Stripe                           |
+| Media Storage  | Cloudinary (for food images)   |
 
 ## 💡 Why This Project?
 
@@ -53,6 +55,7 @@ Unlike large platforms like Swiggy and Zomato that overshadow smaller restaurant
 - Google Maps integration for real-time delivery tracking
 - Push notifications for order updates
 - Multilingual support for wider accessibility
+- Advanced Cloudinary features like image optimization & transformations
 
 ## 🧑‍💻 Developer
 
