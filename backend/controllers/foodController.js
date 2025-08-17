@@ -5,7 +5,6 @@ import cloudinary from "../config/cloudinary.js";
 // add food item
 const addFood = async (req,res) =>{
 
-    console.log(req.body);
     const food = new foodModel({
         name:req.body.name,
         description : req.body.description,
@@ -16,7 +15,6 @@ const addFood = async (req,res) =>{
 
     try{
         await food.save();
-          console.log("Saved food with image URL:", req.file.path);
         res.json({success:true,message:"Food Added"})
     } catch{
         console.log(error)
