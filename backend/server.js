@@ -17,27 +17,61 @@ const port = process.env.PORT || 4000;
 app.use(express.json());
 
 // ✅ allowlist of frontend domains
+// const allowlist = [
+//   "http://localhost:5173", // admin frontend
+//   "http://localhost:5174", // user frontend
+//   "https://food-delivery-app-frontend-rzxm.onrender.com",
+//   "https://food-delivery-app-admin-58ts.onrender.com",
+// ];
+
+// app.use(
+//   cors({
+//     origin: (origin, cb) => {
+//       // Allow Postman/cURL (no origin header)
+//       if (!origin) return cb(null, true);
+
+//       if (allowlist.includes(origin)) {
+//         return cb(null, true); // allow specific origins
+//       }
+//       cb(new Error("Not allowed by CORS")); // block everything else
+//     },
+//     credentials: true, // allow cookies
+//   })
+// );
+
+
 const allowlist = [
-  "http://localhost:5173", // admin frontend
-  "http://localhost:5174", // user frontend
+  "http://localhost:5173",
+  "http://localhost:5174", 
   "https://food-delivery-app-frontend-rzxm.onrender.com",
   "https://food-delivery-app-admin-58ts.onrender.com",
 ];
 
-app.use(
-  cors({
-    origin: (origin, cb) => {
-      // Allow Postman/cURL (no origin header)
-      if (!origin) return cb(null, true);
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    
+    if (allowlist.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    return callback(new Error('Not allowed by CORS'), false);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'x-csrf-token',
+    'Access-Control-Allow-Credentials'
+  ],
+  exposedHeaders: ['set-cookie'], // ✅ Add this
+  optionsSuccessStatus: 200 // ✅ Add this for legacy browser support
+}));
 
-      if (allowlist.includes(origin)) {
-        return cb(null, true); // allow specific origins
-      }
-      cb(new Error("Not allowed by CORS")); // block everything else
-    },
-    credentials: true, // allow cookies
-  })
-);
+// ✅ Add explicit OPTIONS handling
+app.options('*', cors());
+
 
 app.use(cookieParser());
 // db connection

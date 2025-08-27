@@ -2,8 +2,45 @@ import adminModel from "../models/adminModel.js"
 import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken"
 
-const login =async(req,res)=>{
-    const {email,password}=req.body;
+// const login =async(req,res)=>{
+//     const {email,password}=req.body;
+//     try {
+//         const admin = await adminModel.findOne({email});
+//         if(!admin){
+//            return res.status(400).json({success:false,message:'Invalid Credentials'});
+//         }        
+//         const isMatch = await bcrypt.compare(password,admin.password);
+//         if(!isMatch){
+//             return res.status(400).json({success:false,message:'Invalid Credentials'});
+//         }
+//         const token = createToken(admin._id);
+//         res.cookie('token', token, {
+//             httpOnly: true,
+//             secure: process.env.NODE_ENV === 'production',
+//             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+//             maxAge: 7 * 24 * 60 * 60 * 1000,
+//         });
+//          res.status(200).json({
+//             success: true,
+//             user: {
+//                 id: admin._id,
+//                 name: admin.name,
+//                 email: admin.email,
+//             },
+//             message:'logged In successfully'
+//         });
+//     } catch (error) {
+//          console.error('Login error:', error); // ✅ ADD: Log actual error
+//         res.status(500).json({
+//             success: false,
+//             errors: { general: 'Login failed. Please try again.' }
+//         });
+//     }    
+
+// }
+
+const login = async(req,res) => {
+    const {email,password} = req.body;
     try {
         const admin = await adminModel.findOne({email});
         if(!admin){
@@ -14,13 +51,25 @@ const login =async(req,res)=>{
             return res.status(400).json({success:false,message:'Invalid Credentials'});
         }
         const token = createToken(admin._id);
-        res.cookie('token', token, {
+        
+        // ✅ Fixed cookie settings for production
+        const cookieOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
             maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
-         res.status(200).json({
+        };
+
+        if (process.env.NODE_ENV === 'production') {
+            cookieOptions.secure = true;
+            cookieOptions.sameSite = 'none';
+            cookieOptions.domain = '.onrender.com'; // ✅ Add this for Render
+        } else {
+            cookieOptions.secure = false;
+            cookieOptions.sameSite = 'lax';
+        }
+
+        res.cookie('token', token, cookieOptions);
+        
+        res.status(200).json({
             success: true,
             user: {
                 id: admin._id,
@@ -30,13 +79,12 @@ const login =async(req,res)=>{
             message:'logged In successfully'
         });
     } catch (error) {
-         console.error('Login error:', error); // ✅ ADD: Log actual error
+        console.error('Login error:', error);
         res.status(500).json({
             success: false,
             errors: { general: 'Login failed. Please try again.' }
         });
     }    
-
 }
 
 const createToken=(id)=>{
@@ -44,21 +92,52 @@ const createToken=(id)=>{
 }
 
 
-const logout = async(req,res)=>{
-       try {
-        res.clearCookie("token", {
+// const logout = async(req,res)=>{
+//        try {
+//         res.clearCookie("token", {
+//             httpOnly: true,
+//             secure: process.env.NODE_ENV === 'production',
+//             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+//         })
+//         res.status(200).json({
+//             success: true,
+//             message: "logged out successfully"
+//         })
+//     } catch (error) {
+//         console.log(error)
+//     }
+// }
+
+const logout = async(req,res) => {
+    try {
+        const clearCookieOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        })
+        };
+
+        if (process.env.NODE_ENV === 'production') {
+            clearCookieOptions.secure = true;
+            clearCookieOptions.sameSite = 'none';
+            clearCookieOptions.domain = '.onrender.com'; // ✅ Add this
+        } else {
+            clearCookieOptions.secure = false;
+            clearCookieOptions.sameSite = 'lax';
+        }
+
+        res.clearCookie("token", clearCookieOptions);
+        
         res.status(200).json({
             success: true,
             message: "logged out successfully"
-        })
+        });
     } catch (error) {
-        console.log(error)
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Logout failed"
+        });
     }
 }
+
 
 const verifyAdmin = async (req, res) => {
   try {
