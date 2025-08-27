@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import './Dashboard.css';
-import axios from 'axios';
+import axios from '../../../utils/credentials.js';
 import { toast } from 'react-toastify';
 
-const Dashboard = ({ url }) => {
+const Dashboard = () => {
   const [stats, setStats] = useState({
     totalItems: 0,
   });
@@ -11,7 +11,7 @@ const Dashboard = ({ url }) => {
   useEffect(() => {
     const fetchDashboardStats = async () => {
       try {
-        const response = await axios.get(`${url}/api/food/list`);
+        const response = await axios.get("/api/food/list");
         if (response.data.success) {
           setStats((prev) => ({
             ...prev,
@@ -25,9 +25,8 @@ const Dashboard = ({ url }) => {
         toast.error("Error fetching dashboard data");
       }
     };
-
     fetchDashboardStats();
-  }, [url]);
+  }, []);
 
   return (
     <div className="dashboard">

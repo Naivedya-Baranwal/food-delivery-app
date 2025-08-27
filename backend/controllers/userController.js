@@ -19,7 +19,7 @@ const loginUser = async (req , res) => {
         }
 
         const token = createToken(user._id);
-        res.json({success:true,token})
+        res.json({success:true,token,message:"Login successful. Welcome back!"})
 
     } catch(error){
         console.log(error)
@@ -40,18 +40,16 @@ const registerUser = async (req , res)=>{
         if(exists){
             return res.json({success:false,message:"User already exists"})
         }
-        // validating email format and strong password
+        
         if(!validator.isEmail(email)){
             return res.json({success:false,message:"Please enter a valid email"})
         }
 
-        // password checking
         if(password.length<8){
             return res.json({success:false,message:"Please enter a strong password"})
         }
 
-        // hashing the entered password by user
-        const salt = await bcrypt.genSalt(10) //range of genSalt for hashing password 5-15
+        const salt = await bcrypt.genSalt(10) 
         const hashedPassword = await bcrypt.hash(password,salt);
 
         const newUser = new userModel({
@@ -62,7 +60,7 @@ const registerUser = async (req , res)=>{
 
         const user = await newUser.save()
         const token = createToken(user._id)
-        res.json({success:true,token});
+        res.json({success:true,token,message:"Account created successfully."});
 
     } catch(error){
         console.log(error);

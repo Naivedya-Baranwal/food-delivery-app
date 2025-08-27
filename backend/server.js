@@ -6,6 +6,8 @@ import userRouter from "./routes/userRoute.js";
 import 'dotenv/config'
 import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
+import adminRouter from "./routes/adminRoute.js";
+import cookieParser from 'cookie-parser';
 
 // app config
 const app = express();
@@ -13,16 +15,38 @@ const port = process.env.PORT || 4000;
 
 // middleware
 app.use(express.json());
-app.use(cors()); 
 
+// ✅ allowlist of frontend domains
+const allowlist = [
+  "http://localhost:5173", // admin frontend
+  "http://localhost:5174", // user frontend
+];
+
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      // Allow Postman/cURL (no origin header)
+      if (!origin) return cb(null, true);
+
+      if (allowlist.includes(origin)) {
+        return cb(null, true); // allow specific origins
+      }
+      cb(new Error("Not allowed by CORS")); // block everything else
+    },
+    credentials: true, // allow cookies
+  })
+);
+
+app.use(cookieParser());
 // db connection
 connectDB();
 
 // api endpoints
 app.use("/api/food",foodRouter);
-app.use("/api/user",userRouter)
-app.use("/api/cart",cartRouter)
-app.use("/api/order",orderRouter)
+app.use("/api/user",userRouter);
+app.use("/api/cart",cartRouter);
+app.use("/api/order",orderRouter);
+app.use("/api/admin",adminRouter);
 
 app.get("/",(req,res)=>{
     res.send("working correctly");

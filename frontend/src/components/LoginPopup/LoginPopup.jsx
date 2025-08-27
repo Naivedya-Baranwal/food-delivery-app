@@ -3,6 +3,7 @@ import './LoginPopup.css';
 import { assets } from '../../assets/assets';
 import { StoreContext } from '../../context/StoreContext';
 import axios from "axios";
+import { toast } from 'react-toastify';
 
 function LoginPopup({setShowLogin}) {
 
@@ -38,12 +39,13 @@ function LoginPopup({setShowLogin}) {
 
         const response = await axios.post(newUrl,data);
         if(response.data.success){
+            toast.success(response.data.message);
             setToken(response.data.token);
-            localStorage.setItem("token",response.data.token)
+            localStorage.setItem("token",response.data.token);
             setShowLogin(false)
         }
         else{
-            alert(response.data.message)
+            toast.error(response.data.message)
         }
     }
 

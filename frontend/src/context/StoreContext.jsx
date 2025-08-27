@@ -96,12 +96,10 @@ const StoreContextProvider = (props) => {
                     }
                 }
             };
-
             tryFetchData();
         };
 
         loadData();
-        return () => { };
     }, []);
 
     const contextValue = {
