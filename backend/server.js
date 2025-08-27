@@ -20,6 +20,8 @@ app.use(express.json());
 const allowlist = [
   "http://localhost:5173", // admin frontend
   "http://localhost:5174", // user frontend
+  "https://food-delivery-app-admin-58ts.onrender.com/",
+  "https://food-delivery-app-frontend-rzxm.onrender.com/",
 ];
 
 app.use(
