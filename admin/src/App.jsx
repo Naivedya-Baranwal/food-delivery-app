@@ -1,4 +1,3 @@
-import React from 'react'
 import Navbar from './components/Navbar/Navbar'
 import Sidebar from './components/Sidebar/Sidebar'
 import { Route, Routes } from 'react-router-dom'
@@ -11,7 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
 
-  const url = "https://food-delivery-app-rzv6.onrender.com";
+  const url = import.meta.env.VITE_BACKEND_URL;
 
   return (
     <div>
