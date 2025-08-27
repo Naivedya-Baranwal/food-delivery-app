@@ -31,19 +31,6 @@ const App = () => {
     checkAuthStatus();
   }, []);
 
-  // const renderProtectedRoute = (component) => {
-  //   if (!isLoggedIn) {
-  //     return (
-  //       <div style={{ padding: '20px', textAlign: 'center' }}>
-  //         <h3>Please Login</h3>
-  //         <p>You need to be authenticated to access this page.</p>
-  //         <button onClick={() => setShowLogin(true)}>Login</button>
-  //       </div>
-  //     );
-  //   }
-  //   return component;
-  // };
-
   const renderProtectedRoute = (component) => {
     if (!isLoggedIn) {
       return (
