@@ -1,22 +1,31 @@
 import './Navbar.css'
 import {assets} from '../../assets/assets'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from '../../../utils/credentials';
 import { toast } from 'react-toastify';
 
+
 const Navbar = ({isLoggedIn,setIsLoggedIn,setShowLogin}) => {
-  const handleLogout = async()=>{
-     try {
-      const response = await axios.post("/api/admin/logout");
-      if(response.data.success){
+  const navigate = useNavigate();
+  const handleLogout = ()=>{
+   toast.success('Logout successful. See you soon!');
+        // localStorage.removeItem("token");
+        localStorage.clear();
         setIsLoggedIn(false);
-        toast.success(response.data.message);
-      }
-     } catch (error) {
-       toast.error('error in logout');
-       console.log(error)
-     }
+        navigate("/");
   }
+  // const handleLogout = async()=>{
+  //    try {
+  //     const response = await axios.post("/api/admin/logout");
+  //     if(response.data.success){
+  //       setIsLoggedIn(false);
+  //       toast.success(response.data.message);
+  //     }
+  //    } catch (error) {
+  //      toast.error('error in logout');
+  //      console.log(error)
+  //    }
+  // }
   return (
 <div className="navbar">
   <Link to='/'>
