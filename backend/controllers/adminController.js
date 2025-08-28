@@ -14,11 +14,14 @@ import jwt from "jsonwebtoken"
 //             return res.status(400).json({success:false,message:'Invalid Credentials'});
 //         }
 //         const token = createToken(admin._id);
-//         res.cookie('token', token, {
+//          const isProd = process.env.NODE_ENV === 'production';
+
+//          res.cookie('token', token, {
 //             httpOnly: true,
-//             secure: process.env.NODE_ENV === 'production',
-//             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+//             secure: isProd,               // secure only in prod
+//             sameSite: isProd ? 'none' : 'lax', // 'none' for cross-site in prod, 'lax' for localhost
 //             maxAge: 7 * 24 * 60 * 60 * 1000,
+//             path: '/',                    // ensure consistent path for delete
 //         });
 //          res.status(200).json({
 //             success: true,
@@ -52,22 +55,23 @@ const login = async(req,res) => {
         }
         const token = createToken(admin._id);
         
-        // ✅ Fixed cookie settings for production
-        const cookieOptions = {
-            httpOnly: true,
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        };
-
+        // ✅ Fixed cookie settings for Render
         if (process.env.NODE_ENV === 'production') {
-            cookieOptions.secure = true;
-            cookieOptions.sameSite = 'none';
-            cookieOptions.domain = '.onrender.com'; // ✅ Add this for Render
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none',
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+                // ❌ Remove domain setting - let browser handle it
+            });
         } else {
-            cookieOptions.secure = false;
-            cookieOptions.sameSite = 'lax';
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: false,
+                sameSite: 'lax',
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+            });
         }
-
-        res.cookie('token', token, cookieOptions);
         
         res.status(200).json({
             success: true,
@@ -94,36 +98,38 @@ const createToken=(id)=>{
 
 // const logout = async(req,res)=>{
 //        try {
-//         res.clearCookie("token", {
+     
+//          const isProd = process.env.NODE_ENV === 'production';
+//         res.clearCookie('token', {
 //             httpOnly: true,
-//             secure: process.env.NODE_ENV === 'production',
-//             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-//         })
+//             secure: isProd,
+//             sameSite: isProd ? 'none' : 'lax',
+//             path: '/',                   // must match the path used in login
+//         });
 //         res.status(200).json({
 //             success: true,
 //             message: "logged out successfully"
 //         })
 //     } catch (error) {
-//         console.log(error)
+//         console.log(error);
+//           res.status(500).json({ success: false, message: "logout failed" });
 //     }
 // }
-
 const logout = async(req,res) => {
     try {
-        const clearCookieOptions = {
-            httpOnly: true,
-        };
-
         if (process.env.NODE_ENV === 'production') {
-            clearCookieOptions.secure = true;
-            clearCookieOptions.sameSite = 'none';
-            clearCookieOptions.domain = '.onrender.com'; // ✅ Add this
+            res.clearCookie("token", {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none',
+            });
         } else {
-            clearCookieOptions.secure = false;
-            clearCookieOptions.sameSite = 'lax';
+            res.clearCookie("token", {
+                httpOnly: true,
+                secure: false,
+                sameSite: 'lax',
+            });
         }
-
-        res.clearCookie("token", clearCookieOptions);
         
         res.status(200).json({
             success: true,
@@ -139,20 +145,55 @@ const logout = async(req,res) => {
 }
 
 
+
+// const verifyAdmin = async (req, res) => {
+//   try {
+//     const token = req.cookies.token;
+//     if (!token) {
+//       return res.status(401).json({success: false, message: 'No token provided'});
+//     }
+    
+//     const tokenDecode = jwt.verify(token, process.env.JWT_SECRET);
+//     const admin = await adminModel.findById(tokenDecode.id).select('-password');
+    
+//     if (!admin) {
+//       return res.status(401).json({success: false, message: 'Admin not found'});
+//     }
+    
+//     res.status(200).json({
+//       success: true,
+//       user: {
+//         id: admin._id,
+//         name: admin.name,
+//         email: admin.email,
+//       }
+//     });
+//   } catch (error) {
+//     res.status(401).json({success: false, message: 'Invalid token'});
+//   }
+// };
 const verifyAdmin = async (req, res) => {
+  console.log('🍪 All cookies:', req.cookies);
+  console.log('🔍 Token from cookies:', req.cookies.token);
+  console.log('📍 Request headers:', req.headers.cookie);
+  
   try {
     const token = req.cookies.token;
     if (!token) {
+      console.log('❌ No token found in cookies');
       return res.status(401).json({success: false, message: 'No token provided'});
     }
     
+    console.log('✅ Token found, verifying...');
     const tokenDecode = jwt.verify(token, process.env.JWT_SECRET);
     const admin = await adminModel.findById(tokenDecode.id).select('-password');
     
     if (!admin) {
+      console.log('❌ Admin not found in database');
       return res.status(401).json({success: false, message: 'Admin not found'});
     }
     
+    console.log('✅ Admin verified successfully:', admin.email);
     res.status(200).json({
       success: true,
       user: {
@@ -162,6 +203,7 @@ const verifyAdmin = async (req, res) => {
       }
     });
   } catch (error) {
+    console.log('❌ Token verification failed:', error.message);
     res.status(401).json({success: false, message: 'Invalid token'});
   }
 };
