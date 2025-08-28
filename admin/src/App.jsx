@@ -23,11 +23,9 @@ const App = () => {
           setIsLoggedIn(true);
         }
       } catch (error) {
-        console.log('Not authenticated');
         setIsLoggedIn(false);
       }
     };
-
     checkAuthStatus();
   }, []);
 
