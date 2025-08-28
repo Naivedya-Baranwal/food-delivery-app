@@ -57,19 +57,18 @@ const login = async(req,res) => {
         
         // ✅ Fixed cookie settings for Render
         if (process.env.NODE_ENV === 'production') {
-            res.cookie('token', token, {
+            res.cookie("token", token, {
                 httpOnly: true,
                 secure: true,
                 sameSite: 'None',
                 maxAge: 7 * 24 * 60 * 60 * 1000,
-                domain:".onrender.com"
                 // ❌ Remove domain setting - let browser handle it
             });
         } else {
             res.cookie('token', token, {
                 httpOnly: true,
                 secure: false,
-                sameSite: 'lax',
+                sameSite: 'Lax',
                 maxAge: 7 * 24 * 60 * 60 * 1000,
             });
         }
@@ -123,13 +122,12 @@ const logout = async(req,res) => {
                 httpOnly: true,
                 secure: true,
                 sameSite: 'None',
-                domain:".onrender.com"
             });
         } else {
             res.clearCookie("token", {
                 httpOnly: true,
                 secure: false,
-                sameSite: 'lax',
+                sameSite: 'Lax',
             });
         }
         
