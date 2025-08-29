@@ -7,7 +7,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 //placing user order for frontend
 const placeOrder = async (req, res) => {
     const frontend_url = "https://food-delivery-app-frontend-rzxm.onrender.com";
-  
     try {
       const {
         userId,
@@ -23,7 +22,7 @@ const placeOrder = async (req, res) => {
         amount,
         address,
         payment: paymentMethod === "COD", 
-        status: paymentMethod === "COD" ? "Order Placed" : "Food Processing",
+        status:"Order Placed" ,
         paymentMethod,
       });
   
@@ -86,19 +85,18 @@ const verifyOrder = async (req,res)=>{
 // user orders for frontend
 const usersOrders = async (req,res) =>{
     try {
-        const orders = await orderModel.find({userId:req.body.userId});
+        const orders = await orderModel.find({userId:req.body.userId}).sort({ createdAt: -1 });;
         res.json({success:true,data:orders});
     } catch (error) {
         console.log(error);
         res.json({success:false,message:"Error"});
-        
     }
 }
 
 // listing orders for admin panel
 const listOrders = async (req,res) => {
      try {
-        const orders = await orderModel.find({});
+        const orders = await orderModel.find({}).sort({ createdAt: -1 });
         res.json({success:true,data:orders});
      } catch (error) {
         console.log(error);

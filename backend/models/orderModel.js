@@ -9,7 +9,7 @@ const orderSchema = new mongoose.Schema({
     date:{type:Date,default:Date.now()},
     payment:{type:Boolean,default:false},
     paymentMethod: { type: String, enum: ["Online", "COD"], default: "Online" } 
-})
+},{ timestamps: true })
 
 const orderModel = mongoose.models.order || mongoose.model("order",orderSchema);
 export default orderModel;

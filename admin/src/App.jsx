@@ -28,6 +28,7 @@ const App = () => {
     };
     checkAuthStatus();
   }, []);
+  
 
   const renderProtectedRoute = (component) => {
     if (!isLoggedIn) {

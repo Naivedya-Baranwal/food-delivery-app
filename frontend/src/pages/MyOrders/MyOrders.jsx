@@ -12,7 +12,6 @@ const MyOrders = () => {
     const fetchOrders = async () =>{
         const response = await axios.post(url+"/api/order/userorders",{},{headers:{token}});
         setData(response.data.data);
-        
     }
 
     useEffect(() => {
@@ -21,7 +20,6 @@ const MyOrders = () => {
             const interval = setInterval(() => {
                 fetchOrders(); 
             }, 5000); 
-    
             return () => clearInterval(interval);
         }
     }, [token]);
@@ -36,7 +34,7 @@ const MyOrders = () => {
             {data.map((order,index)=>{
              return(
                 <div key={index} className="my-orders-order">
-                 <img src={assets.parcel_icon} alt="" />
+                 <img src={assets.parcel_icon} alt=""/>
                  <p>{order.items.map((item,index)=>{
                     if(index===order.items.length-1){
                         return item.name +" x "+ item.quantity
