@@ -75,6 +75,7 @@ const StoreContextProvider = (props) => {
         fetchCartAfterLogin();
     }, [token]);
 
+    
     const loadCartData = async (token) => {
         try {
             const response = await axios.post(url + "/api/cart/get", {}, {
