@@ -41,14 +41,16 @@ const StoreContextProvider = (props) => {
         return totalAmount;
     }
 
+   
+
     const fetchFoodList = async () => {
         try {
             console.log("Attempting to fetch food list...");
             const response = await axios.get(url + "/api/food/list", {
-                timeout: 30000 
+                timeout: 30000
             });
             setFoodList(response.data.data);
-            setLoading(false); 
+            setLoading(false);
             console.log("Food list fetched successfully");
             return true;
         } catch (err) {
@@ -56,6 +58,24 @@ const StoreContextProvider = (props) => {
             throw err;
         }
     }
+
+// added for login
+     useEffect(() => {
+        const fetchCartAfterLogin = async () => {
+            if (token) {
+                try {
+                    await loadCartData(token);
+                } catch (err) {
+                    console.error("Error fetching cart after login:", err);
+                }
+            } else {
+                setCartItems({});
+            }
+        };
+        fetchCartAfterLogin();
+    }, [token]);
+
+    
 
     const loadCartData = async (token) => {
         try {
@@ -73,8 +93,8 @@ const StoreContextProvider = (props) => {
         const loadData = async () => {
             setLoading(true);
             let attemptCount = 0;
-            const maxRetryDelay = 10000; 
-            const baseDelay = 2000; 
+            const maxRetryDelay = 10000;
+            const baseDelay = 2000;
 
             const tryFetchData = async () => {
                 while (loading) {
@@ -88,7 +108,7 @@ const StoreContextProvider = (props) => {
                             setToken(storedToken);
                             await loadCartData(storedToken);
                         }
-                        break; 
+                        break;
                     } catch (err) {
                         const delay = Math.min(baseDelay * Math.pow(1.5, attemptCount - 1), maxRetryDelay);
                         console.log(`Attempt ${attemptCount} failed. Retrying in ${delay / 1000} seconds...`);
