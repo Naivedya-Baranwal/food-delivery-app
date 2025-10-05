@@ -4,6 +4,64 @@
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+  font-family: Outfit, sans-serif;
+}
+
+body{
+  min-height: 100vh;
+  background-color: #fcfcfc;
+}
+
+a{
+  text-decoration: none;
+  color: inherit;
+}
+
+hr{
+  border: none;
+  height: 1px;
+  background-color: #a9a9a9;
+}
+
+.app-content{
+  display: block;
+  margin-left: 0%;
+  margin-top: 60px; /* Navbar height */
+  height: calc(100vh - 60px);
+  overflow: hidden;
+}
+
+.flex-col{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cursor{
+  cursor: pointer;
+}
+
+/* Scrollbar style for content */
+.app-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.app-content::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 3px;
+}
+
+
+
+
+
+
+/* @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
+*{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
   font-family: Outfit;
 }
 
@@ -27,6 +85,7 @@ hr{
   display: flex;
 }
 
+
 .flex-col{
   display: flex;
   flex-direction: column;
@@ -35,4 +94,4 @@ hr{
 
 .cursor{
   cursor: pointer;
-}
+} */

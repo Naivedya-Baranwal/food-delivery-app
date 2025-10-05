@@ -23,6 +23,7 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemon": "^3.1.9",
+    "socket.io": "^4.8.1",
     "stripe": "^17.7.0",
     "validator": "^13.12.0"
   }

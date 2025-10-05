@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 import validator from "validator"
 
-
 // Login user
 const loginUser = async (req , res) => {
     const {email,password} = req.body;
@@ -13,7 +12,6 @@ const loginUser = async (req , res) => {
             return res.json({success:false,message:"User doesn't exist"})
         }
         const isMatch = await bcrypt.compare(password,user.password);
-        
         if(!isMatch){
             return res.json({success:false,message:"Invalid Credentials"})
         }
@@ -32,7 +30,7 @@ const createToken = (id) =>{
 
 // register user
 const registerUser = async (req , res)=>{
-    const {name,password,email} = req.body;
+    const {name,password,email,phone} = req.body;
     try{
         // checking is user already exists
         const exists = await userModel.findOne({email});
@@ -43,7 +41,9 @@ const registerUser = async (req , res)=>{
         if(!validator.isEmail(email)){
             return res.json({success:false,message:"Please enter a valid email"})
         }
-
+        if(!validator.isMobilePhone(phone)){
+            return res.json({success:false,message:"Please enter a valid phone number"})
+        }
         if(password.length<8){
             return res.json({success:false,message:"Please enter a strong password"})
         }
@@ -54,6 +54,7 @@ const registerUser = async (req , res)=>{
         const newUser = new userModel({
             name : name,
             email: email,
+            phone: phone,
             password: hashedPassword
         });
 
@@ -68,3 +69,76 @@ const registerUser = async (req , res)=>{
 }
 
 export {loginUser,registerUser}
+
+
+
+//old
+// import userModel from "../models/userModel.js";
+// import jwt from "jsonwebtoken"
+// import bcrypt from "bcrypt"
+// import validator from "validator"
+
+// // Login user
+// const loginUser = async (req , res) => {
+//     const {email,password} = req.body;
+//     try{
+//         const user = await userModel.findOne({email});
+//         if(!user){
+//             return res.json({success:false,message:"User doesn't exist"})
+//         }
+//         const isMatch = await bcrypt.compare(password,user.password);
+        
+//         if(!isMatch){
+//             return res.json({success:false,message:"Invalid Credentials"})
+//         }
+//         const token = createToken(user._id);
+//         res.json({success:true,token,message:"Login successful. Welcome back!"})
+
+//     } catch(error){
+//         console.log(error)
+//         res.json({success:false,message:"Error"})
+//     }
+// }
+
+// const createToken = (id) =>{
+//     return jwt.sign({id},process.env.JWT_SECRET)
+// }
+
+// // register user
+// const registerUser = async (req , res)=>{
+//     const {name,password,email} = req.body;
+//     try{
+//         // checking is user already exists
+//         const exists = await userModel.findOne({email});
+//         if(exists){
+//             return res.json({success:false,message:"User already exists"})
+//         }
+        
+//         if(!validator.isEmail(email)){
+//             return res.json({success:false,message:"Please enter a valid email"})
+//         }
+
+//         if(password.length<8){
+//             return res.json({success:false,message:"Please enter a strong password"})
+//         }
+
+//         const salt = await bcrypt.genSalt(10) 
+//         const hashedPassword = await bcrypt.hash(password,salt);
+
+//         const newUser = new userModel({
+//             name : name,
+//             email: email,
+//             password: hashedPassword
+//         });
+
+//         const user = await newUser.save()
+//         const token = createToken(user._id)
+//         res.json({success:true,token,message:"Account created successfully."});
+
+//     } catch(error){
+//         console.log(error);
+//         res.json({success:false,message:"Error"})
+//     }
+// }
+
+// export {loginUser,registerUser}

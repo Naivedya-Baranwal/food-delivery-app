@@ -10,10 +10,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.9.0",
     "@tailwindcss/vite": "^4.1.13",
+    "axios": "^1.12.2",
+    "bcrypt": "^6.0.0",
+    "jsonwebtoken": "^9.0.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "tailwindcss": "^4.1.13"
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.9.3",
+    "react-toastify": "^11.0.5",
+    "socket.io-client": "^4.8.1",
+    "tailwindcss": "^4.1.13",
+    "validator": "^13.15.15"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",

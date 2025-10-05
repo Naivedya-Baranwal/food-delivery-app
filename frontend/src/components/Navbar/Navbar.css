@@ -1,11 +1,12 @@
 .navbar{
     position: fixed;
     top: 0;
-    left: 4%;
-    width: 88%;
+    left: 0%;
+    width: 100%;
     background-color: white;
     z-index: 1000; 
-    padding: 15px 0px;
+    height: 65px;
+    padding: 30px 85px;
     display: flex;
     justify-content: space-between;
     align-items: center;

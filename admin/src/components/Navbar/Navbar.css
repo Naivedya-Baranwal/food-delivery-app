@@ -1,4 +1,12 @@
 .navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #fff;
+  z-index: 1000;
+  border-bottom: 1px solid #ddd;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -16,7 +24,7 @@
 }
 
 .nav-btn {
-  background-color: #ff5722; /* orange shade */
+  background-color: #ff5722; 
   color: white;
   border: none;
   padding: 8px 16px;
@@ -35,3 +43,61 @@
   border-radius: 50%;
   cursor: pointer;
 }
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 6px 10px;
+  }
+
+  .navbar .logo {
+    width: 100px;
+  }
+
+  .nav-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .profile {
+    width: 30px;
+  }
+}
+
+
+/* .navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 4%;
+}
+
+.navbar .logo {
+  width: max(10%, 200px);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;  
+}
+
+.nav-btn {
+  background-color: #ff5722;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.nav-btn:hover {
+  background-color: #e64a19;
+}
+
+.profile {
+  width: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+} */
