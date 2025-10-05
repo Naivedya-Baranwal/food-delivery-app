@@ -3,6 +3,7 @@ import axios from 'axios';
 import {toast} from 'react-toastify';
 import './PlaceOrder.css'
 import { StoreContext } from '../../context/StoreContext'
+import { LocationContext } from '../../App';
 import { useNavigate } from 'react-router-dom';
 import { IoSearchOutline } from "react-icons/io5";
 import { LuLocateFixed } from "react-icons/lu";
@@ -11,14 +12,15 @@ import "leaflet/dist/leaflet.css";
 
 function PlaceOrder() {
 
-  const { getTotalCartAmount, token, food_list, cartItems, url, setCartItems,location,mapCenter, setMapCenter } = useContext(StoreContext);
+  const { getTotalCartAmount, token, food_list, cartItems, url, setCartItems, location, mapCenter, setMapCenter } = useContext(StoreContext);
+  const { requestLocation } = useContext(LocationContext);
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [data, setData] = useState({
-    location: location?.formatted,
-    longitude: "",
-    latitude: ""
+    location: location?.formatted || "",
+    longitude: location?.lon || "",
+    latitude: location?.lat || ""
   })
 
    async function getAddressByLatLng(latitude,longitude){
@@ -47,18 +49,29 @@ function PlaceOrder() {
     }
   }
   async function getCurrentLocation(){
-     navigator.geolocation.getCurrentPosition(async (position) => {
-      const { latitude, longitude } = position.coords;
-      try {
-        const res = await axios.get(
-          `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&format=json&apiKey=${import.meta.env.VITE_GEOAPIKEY}`
-        );
-        getAddressByLatLng(latitude,longitude);
-        setMapCenter([latitude, longitude]);
-      } catch (err) {
-        console.error("Error fetching location:", err);
+    try {
+      // Use the requestLocation function from LocationContext
+      requestLocation();
+      
+      // Update data with location information when it becomes available
+      if (location) {
+        setData(data => ({ 
+          ...data, 
+          location: location.formatted || "", 
+          longitude: location.lon || "", 
+          latitude: location.lat || "" 
+        }));
+        
+        if (location.lat && location.lon) {
+          setMapCenter([location.lat, location.lon]);
+        }
+      } else {
+        toast.info("Requesting your location...");
       }
-    })
+    } catch (err) {
+      console.error("Error getting current location:", err);
+      toast.error("Could not get your location");
+    }
   }
   
 
@@ -134,6 +147,22 @@ function PlaceOrder() {
       navigate('/cart');
     }
   }, [token]);
+  
+  // Update data when location changes
+  useEffect(() => {
+    if (location) {
+      setData(prevData => ({
+        ...prevData,
+        location: location.formatted || prevData.location,
+        longitude: location.lon || prevData.longitude,
+        latitude: location.lat || prevData.latitude
+      }));
+      
+      if (location.lat && location.lon && !mapCenter) {
+        setMapCenter([location.lat, location.lon]);
+      }
+    }
+  }, [location]);
 
   if (loading) {
     return (

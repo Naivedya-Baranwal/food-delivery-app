@@ -10,32 +10,50 @@ const StoreContextProvider = (props) => {
     const [token, setToken] = useState("")
     const [food_list, setFoodList] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [socket, setSocket] = useState(null);   // 👈 hold socket here
+    const [socket, setSocket] = useState(null);   
     const [location, setLocation] = useState(null);
      const [mapCenter, setMapCenter] = useState(null);
 
   // 🔹 initialize socket when token is available
     useEffect(() => {
         if (token) {
-            // create socket instance
-            const socketInstance = io(url, {
-                auth: { token },   
-            });
-            setSocket(socketInstance);
-            socketInstance.on("connect", () => {
-                console.log("Socket connected:", socketInstance.id);
-            });
+            try {
+                // create socket instance
+                const socketInstance = io(url, {
+                    auth: { token },
+                    reconnectionAttempts: 5,
+                    reconnectionDelay: 1000,
+                    timeout: 10000
+                });
+                setSocket(socketInstance);
+                
+                socketInstance.on("connect", () => {
+                    console.log("Socket connected:", socketInstance.id);
+                });
 
-            socketInstance.on("disconnect", () => {
-                console.log("Socket disconnected");
-            });
+                socketInstance.on("connect_error", (error) => {
+                    console.error("Socket connection error:", error.message);
+                });
 
-            // cleanup when component unmounts or token changes
-            return () => {
-                socketInstance.disconnect();
-            };
+                socketInstance.on("error", (error) => {
+                    console.error("Socket error:", error);
+                });
+
+                socketInstance.on("disconnect", () => {
+                    console.log("Socket disconnected");
+                });
+
+                // cleanup when component unmounts or token changes
+                return () => {
+                    if (socketInstance) {
+                        socketInstance.disconnect();
+                    }
+                };
+            } catch (error) {
+                console.error("Error setting up socket connection:", error);
+            }
         }
-    }, [token]);
+    }, [token, url]);
 
 
     const addToCart = async (itemId) => {

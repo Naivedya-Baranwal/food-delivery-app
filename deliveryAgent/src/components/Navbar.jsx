@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { logout } from "../store/auth/authThunk";
+import { logout } from "../store/auth/authSlice";
 
 const Navbar = ({ setShowLogin }) => {
   const { token, user } = useSelector((state) => state.auth);
