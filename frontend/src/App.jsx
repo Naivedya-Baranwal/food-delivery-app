@@ -21,7 +21,6 @@ const App = () => {
   
   // Get the location request function but don't call it automatically
   const { requestLocation } = useGetLocation();
-
   return (
     <LocationContext.Provider value={{ requestLocation }}>
       <ToastContainer position="top-center" autoClose={2500} />
