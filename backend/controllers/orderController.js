@@ -2,7 +2,7 @@ import deliveryAgentModel from "../models/deliveryAgentModel.js";
 import deliveryAssignmentModel from "../models/deliveryAssignmentModel.js";
 import orderModel from "../models/orderModel.js";
 import userModel from '../models/userModel.js';
-import adminModel from "../models/adminModel.js"; 
+import adminModel from "../models/adminModel.js";
 import Stripe from "stripe";
 import { restaurant } from "../config/restaurant.js";
 import { sendOtpMail } from "../utils/mail.js";
@@ -12,13 +12,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 // ✅ Helper function to notify admin
 const notifyAdminNewOrder = async (io, order) => {
   try {
-    const admin = await adminModel.findOne({ 
-      email: process.env.ADMIN_EMAIL || "admin@gmail.com" 
+    const admin = await adminModel.findOne({
+      email: process.env.ADMIN_EMAIL || "admin@gmail.com"
     });
 
     if (admin && admin.socketId && admin.isOnline) {
       console.log("✅ Admin is online, sending notification to:", admin.socketId);
-      
+
       io.to(admin.socketId).emit('newOrder', {
         order: order,
         message: `New order from ${order.name}!`,
@@ -26,7 +26,7 @@ const notifyAdminNewOrder = async (io, order) => {
         paymentMethod: order.paymentMethod,
         timestamp: new Date()
       });
-      
+
       console.log("📢 Socket notification sent successfully");
     } else {
       console.log("ℹ️ Admin offline - order saved, will see on login");
@@ -39,94 +39,94 @@ const notifyAdminNewOrder = async (io, order) => {
 
 //placing user order for frontend
 export const placeOrder = async (req, res) => {
-    const frontend_url = process.env.FRONTEND_URL;
-    try {
-      const {
-        userId,
-        items,
-        amount,
-        address,
-        paymentMethod = "Online", 
-      } = req.body;
-  
-      const user = await userModel.findById(userId);
-      if (!user) {
-        return res.status(404).json({ success: false, message: "User not found" });
-      }
-      const newOrder = new orderModel({
-        userId,
-        name:user.name,
-        email:user.email,
-        phone:user.phone,
-        items,
-        amount,
-        address,
-        payment: paymentMethod === "COD",
-        paymentMethod,
-      });
-  
-      await newOrder.save();
-      await userModel.findByIdAndUpdate(userId, { cartData: {} });
-      
-   // ✅ COD Payment - Notify admin immediately (order is confirmed)
+  const frontend_url = process.env.FRONTEND_URL;
+  try {
+    const {
+      userId,
+      items,
+      amount,
+      address,
+      paymentMethod = "Online",
+    } = req.body;
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    const newOrder = new orderModel({
+      userId,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      items,
+      amount,
+      address,
+      payment: paymentMethod === "COD",
+      paymentMethod,
+    });
+
+    await newOrder.save();
+    await userModel.findByIdAndUpdate(userId, { cartData: {} });
+
+    // ✅ COD Payment - Notify admin immediately (order is confirmed)
     if (paymentMethod === "COD") {
       const io = req.app.get('io');
       await notifyAdminNewOrder(io, newOrder);
-      
-      return res.json({ 
-        success: true, 
-        cod: true, 
-        message: "Order placed successfully with COD" 
+
+      return res.json({
+        success: true,
+        cod: true,
+        message: "Order placed successfully with COD"
       });
     }
-      // ✅ Online Payment - Create Stripe session (don't notify yet)
-      const line_items = items.map((item) => ({
-        price_data: {
-          currency: "inr",
-          product_data: { name: item.name },
-          unit_amount: item.price * 100,
-        },
-        quantity: item.quantity,
-      }));
-  
-      line_items.push({
-        price_data: {
-          currency: "inr",
-          product_data: { name: "Delivery Charges" },
-          unit_amount: 20 * 100,
-        },
-        quantity: 1,
-      });
-    
-      const session = await stripe.checkout.sessions.create({
-        line_items,
-        mode: "payment",
-        success_url: `${frontend_url}/verify?success=true&orderId=${newOrder._id}`,
-        cancel_url: `${frontend_url}/verify?success=false&orderId=${newOrder._id}`,
-      });
-      res.json({ success: true, session_url: session.url });
-    } catch (error) {
-      console.log(error);
-      res.json({ success: false, message: "Error" });
-    }
-  };
-  
-export const verifyOrder = async (req,res)=>{
-    const {orderId,success} = req.body;
-    try {
-      const io = req.app.get('io');
-        if(success=="true"){
-        // ✅ Payment successful - Update order
+    // ✅ Online Payment - Create Stripe session (don't notify yet)
+    const line_items = items.map((item) => ({
+      price_data: {
+        currency: "inr",
+        product_data: { name: item.name },
+        unit_amount: item.price * 100,
+      },
+      quantity: item.quantity,
+    }));
+
+    line_items.push({
+      price_data: {
+        currency: "inr",
+        product_data: { name: "Delivery Charges" },
+        unit_amount: 20 * 100,
+      },
+      quantity: 1,
+    });
+
+    const session = await stripe.checkout.sessions.create({
+      line_items,
+      mode: "payment",
+      success_url: `${frontend_url}/verify?success=true&orderId=${newOrder._id}`,
+      cancel_url: `${frontend_url}/verify?success=false&orderId=${newOrder._id}`,
+    });
+    res.json({ success: true, session_url: session.url });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "Error" });
+  }
+};
+
+export const verifyOrder = async (req, res) => {
+  const { orderId, success } = req.body;
+  try {
+    const io = req.app.get('io');
+    if (success == "true") {
+      // ✅ Payment successful - Update order
       const updatedOrder = await orderModel.findByIdAndUpdate(
         orderId,
         { payment: true },
-        { new: true } 
+        { new: true }
       );
 
       if (!updatedOrder) {
-        return res.status(404).json({ 
-          success: false, 
-          message: "Order not found" 
+        return res.status(404).json({
+          success: false,
+          message: "Order not found"
         });
       }
 
@@ -135,57 +135,60 @@ export const verifyOrder = async (req,res)=>{
       // ✅ NOW notify admin (payment is confirmed)
       await notifyAdminNewOrder(io, updatedOrder);
 
-      res.json({ 
-        success: true, 
-        message: "Payment verified successfully" 
+      res.json({
+        success: true,
+        message: "Payment verified successfully"
       });
-        }
-        else {b
+    }
+    else {
+      b
       const deletedOrder = await orderModel.findByIdAndDelete(orderId);
-      
+
       if (deletedOrder) {
         console.log("❌ Payment failed, order deleted:", orderId);
       }
 
-      res.json({ 
-        success: false, 
-        message: "Payment verification failed" 
+      res.json({
+        success: false,
+        message: "Payment verification failed"
       });
-        }
-    } catch (error) {
-        console.error("❌ Error verifying order:", error);
-        res.json({success:false,message:"Error verifying payment"});
     }
+  } catch (error) {
+    console.error("❌ Error verifying order:", error);
+    res.json({ success: false, message: "Error verifying payment" });
+  }
 }
 
 // user orders for frontend
-export const usersOrders = async (req,res) =>{
-    try {
-        const orders = await orderModel.find({
-          userId:req.body.userId,
-        $or: [
-          { payment: true },
-          { paymentMethod: "COD" }
-        ]})
-        .sort({ createdAt: -1 });;
-        res.json({success:true,data:orders});
-    } catch (error) {
-        console.log(error);
-        res.json({success:false,message:"Error"});
-    }
+export const usersOrders = async (req, res) => {
+  try {
+    const orders = await orderModel.find({
+      userId: req.body.userId,
+      $or: [
+        { payment: true },
+        { paymentMethod: "COD" }
+      ]
+    })
+      .sort({ createdAt: -1 });;
+    res.json({ success: true, data: orders });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "Error" });
+  }
 }
 
 export const listOrders = async (req, res) => {
   try {
     const orders = await orderModel
-      .find({ 
+      .find({
         $or: [
           { payment: true },
           { paymentMethod: "COD" }
-        ]})
+        ]
+      })
       .populate("assignedDeliveryBoy", "name phone email")
       .sort({ createdAt: -1 });
-      
+
     res.json({ success: true, data: orders });
   } catch (error) {
     console.error("❌ Error listing orders:", error);
@@ -197,135 +200,208 @@ export const listOrders = async (req, res) => {
 export const updateStatus = async (req, res) => {
   try {
     const { orderId, status } = req.body;
+
+    // Input validation
+    if (!orderId || !status) {
+      return res.status(400).json({
+        success: false,
+        message: "Order ID and status are required"
+      });
+    }
+
+    console.log(`📝 Attempting to update order ${orderId} status to: ${status}`);
+
+    // Validate status value
+    const validStatuses = [
+      "Food Processing",
+      "Out for delivery",
+      "Delivered",
+      "Cancelled"
+    ];
+
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid status. Must be one of: ${validStatuses.join(", ")}`
+      });
+    }
+
+    // Find order
     const order = await orderModel.findById(orderId);
-    
     if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
     }
-    
+
     let availableDeliveryAgents = [];
-    
-    if ((status === "Out for delivery" || !order.assignment) && (status !== "Food Processing")) {
-      const { longitude, latitude } = order.address;
-      
-      const nearByDeliveryAgent = await deliveryAgentModel.find({
-        location: {
-          $near: {
-            $geometry: { type: 'Point', coordinates: [Number(longitude), Number(latitude)] },
-            $maxDistance: 500000
-          }
-        },
-        isOnline: true,
-        isAvailable: true
-      });
-      
-      const candidates = nearByDeliveryAgent.map(d => String(d._id));
-      
-      if (candidates.length == 0) {
-        order.status = status;
-        order.availableAgents = [];
-        await order.save();
-        return res.status(200).json({
-          success: true,
-          message: "Status Updated but delivery Agent not available"
+
+    // Handle "Out for delivery" status
+    if (status === "Out for delivery") {
+      // Validate order has required address data
+      if (!order.address || !order.address.latitude || !order.address.longitude) {
+        console.error("❌ Order lacks address coordinates:", orderId);
+        return res.status(400).json({
+          success: false,
+          message: "Order lacks required address coordinates"
         });
       }
-      
-      const deliveryAssignment = await deliveryAssignmentModel.create({
-        order: order._id,
-        pickup: {
-          name: restaurant.name,
-          address: restaurant.address,
-          latitude: restaurant.latitude,
-          longitude: restaurant.longitude
-        },
-        drop: {
-          address: order.address.location,
-          latitude: order.address.latitude,
-          longitude: order.address.longitude
-        },
-        broadCastedTo: candidates,
-      });
-      
-      order.assignment = deliveryAssignment._id;
-      availableDeliveryAgents = nearByDeliveryAgent.map(agent => ({
-        id: agent._id,
-        name: agent.name,
-        phone: agent.phone,
-        latitude: agent.location.coordinates?.[1],
-        longitude: agent.location.coordinates?.[0]
-      }));
-      order.availableAgents = availableDeliveryAgents;
-      
-      // ✅ Update order status BEFORE emitting (important!)
-      order.status = status;
-      await order.save();
-      
-      console.log("✅ Found available agents:", availableDeliveryAgents);
-      
-      // ✅ Get io instance
-      const io = req.app.get('io');
-      
-      // ✅ Populate order for socket emission
-      const populatedOrder = await orderModel
-        .findById(order._id)
-        .populate('assignedDeliveryBoy', 'name phone email');
-      
-      // ✅ Notify all available agents via socket
-      for (const agent of nearByDeliveryAgent) {
-        if (agent.socketId && agent.isOnline) {
-          io.to(agent.socketId).emit('newOrderAvailable', {
-            assignment: deliveryAssignment,
-            order: populatedOrder, // ✅ Send populated order
-            message: 'New order available for delivery!',
+
+      try {
+        // Find nearby delivery agents
+        const nearByDeliveryAgent = await deliveryAgentModel.find({
+          location: {
+            $near: {
+              $geometry: {
+                type: 'Point',
+                coordinates: [
+                  Number(order.address.longitude),
+                  Number(order.address.latitude)
+                ]
+              },
+              $maxDistance: 500000 // 500km
+            }
+          },
+          isOnline: true,
+          isAvailable: true
+        }).select('_id name phone location socketId isOnline');
+
+        console.log(`✅ Found ${nearByDeliveryAgent.length} nearby agents`);
+
+        const candidates = nearByDeliveryAgent.map(d => String(d._id));
+
+        // No agents available case
+        if (candidates.length === 0) {
+          order.status = status;
+          order.availableAgents = [];
+          await order.save();
+          return res.status(200).json({
+            success: true,
+            message: "Status updated but no delivery agents are currently available"
           });
-          console.log(`📢 Notified agent ${agent.name} about new order ${order._id}`);
         }
-      }
-      
-      // ✅ Notify admin
-      const admin = await adminModel.findOne({
-        email: process.env.ADMIN_EMAIL || 'admin@gmail.com',
-      });
-      
-      if (admin && admin.socketId && admin.isOnline) {
-        io.to(admin.socketId).emit('agentAvailabilityUpdate', {
-          orderId: order._id,
-          order: populatedOrder,
-          availableAgents: order.availableAgents,
-          message: `${availableDeliveryAgents.length} agents are available for this order`,
+
+        // Create delivery assignment
+        const deliveryAssignment = await deliveryAssignmentModel.create({
+          order: order._id,
+          pickup: {
+            name: restaurant.name,
+            address: restaurant.address,
+            latitude: restaurant.latitude,
+            longitude: restaurant.longitude
+          },
+          drop: {
+            address: order.address.location || '',
+            latitude: order.address.latitude,
+            longitude: order.address.longitude
+          },
+          broadCastedTo: candidates,
+          status: 'broadcasted'
         });
-        console.log(`📢 Notified admin about ${availableDeliveryAgents.length} available agents`);
+
+        // Update order with assignment and agents
+        availableDeliveryAgents = nearByDeliveryAgent.map(agent => ({
+          id: agent._id,
+          name: agent.name,
+          phone: agent.phone,
+          latitude: agent.location?.coordinates?.[1] || null,
+          longitude: agent.location?.coordinates?.[0] || null
+        }));
+
+        order.assignment = deliveryAssignment._id;
+        order.availableAgents = availableDeliveryAgents;
+        order.status = status;
+
+        await order.save();
+
+        // Socket notifications
+        const io = req.app.get('io');
+        if (!io) {
+          console.warn("⚠️ Socket.io instance not available");
+        } else {
+          const populatedOrder = await orderModel
+            .findById(order._id)
+            .populate('assignedDeliveryBoy', 'name phone email');
+
+          // Notify available agents
+          for (const agent of nearByDeliveryAgent) {
+            if (agent.socketId && agent.isOnline) {
+              io.to(agent.socketId).emit('newOrderAvailable', {
+                assignment: deliveryAssignment,
+                order: populatedOrder,
+                message: 'New order available for delivery!'
+              });
+              console.log(`📢 Notified agent ${agent.name} about order ${order._id}`);
+            }
+          }
+
+          // Notify admin
+          const admin = await adminModel.findOne({
+            email: process.env.ADMIN_EMAIL || 'admin@gmail.com',
+            isOnline: true
+          });
+
+          if (admin?.socketId) {
+            io.to(admin.socketId).emit('agentAvailabilityUpdate', {
+              orderId: order._id,
+              order: populatedOrder,
+              availableAgents: order.availableAgents,
+              message: `${availableDeliveryAgents.length} agents are available for this order`
+            });
+          }
+        }
+
+        return res.json({
+          success: true,
+          message: "Status updated and delivery agents notified",
+          availableDeliveryAgents
+        });
+
+      } catch (dbError) {
+        console.error("❌ Database error finding agents:", dbError);
+        return res.status(500).json({
+          success: false,
+          message: "Error finding delivery agents",
+          error: dbError.message
+        });
       }
-      
-      // ✅ Return success response
-      return res.json({ 
-        success: true, 
-        message: "Status Updated", 
-        availableDeliveryAgents 
-      });
     }
-    
-    // ✅ For other status changes (not "Out for delivery")
+
+    // Handle other status updates
     order.status = status;
     await order.save();
-    res.json({ success: true, message: "Status Updated", availableDeliveryAgents });
-    
+
+    console.log(`✅ Updated order ${orderId} status to ${status}`);
+
+    return res.json({
+      success: true,
+      message: `Order status updated to ${status}`,
+      order: {
+        id: order._id,
+        status: order.status
+      }
+    });
+
   } catch (error) {
     console.error("❌ Error updating status:", error);
-    res.status(500).json({ success: false, message: "Error updating status" });
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error while updating order status",
+      error: error.message
+    });
   }
 };
 
 
 export const getDeliveryAssignment = async (req, res) => {
   const agentId = req.body.agentId;
-  
+
   try {
     console.log("📦 Fetching assignments for agent:", agentId);
-    
+
     const agent = await deliveryAgentModel.findById(agentId);
-    
+
     if (!agent) {
       return res.status(404).json({
         success: false,
@@ -406,7 +482,7 @@ export const getDeliveryAssignment = async (req, res) => {
         order.address.longitude
       );
 
-      console.log(`📏 Order ${order._id.toString().slice(-6)}: ${(distance/1000).toFixed(2)}km away`);
+      console.log(`📏 Order ${order._id.toString().slice(-6)}: ${(distance / 1000).toFixed(2)}km away`);
 
       // ✅ If within range
       if (distance <= MAX_DISTANCE) {
@@ -420,7 +496,7 @@ export const getDeliveryAssignment = async (req, res) => {
         // ✅ Add agent to broadcast list if not already there
         if (!alreadyBroadcasted) {
           console.log(`✅ Adding agent to broadcast list for order ${order._id.toString().slice(-6)}`);
-          
+
           assignment.broadCastedTo.push(agentId);
           await assignment.save();
 
@@ -451,7 +527,7 @@ export const getDeliveryAssignment = async (req, res) => {
         validAssignments.push(populatedAssignment);
         console.log(`✅ Added order ${order._id.toString().slice(-6)} to valid assignments`);
       } else {
-        console.log(`   Order ${order._id.toString().slice(-6)} is TOO FAR (${(distance/1000).toFixed(2)}km > 50km)`);
+        console.log(`   Order ${order._id.toString().slice(-6)} is TOO FAR (${(distance / 1000).toFixed(2)}km > 50km)`);
       }
     }
 
@@ -481,187 +557,187 @@ export const getDeliveryAssignment = async (req, res) => {
 };
 
 export const acceptAssignment = async (req, res) => {
-    try {
-        const { assignmentId } = req.params;
-        const agentId = req.body.agentId; // From auth middleware
-        
-        console.log("📦 Accepting assignment:", { assignmentId, agentId });
+  try {
+    const { assignmentId } = req.params;
+    const agentId = req.body.agentId; // From auth middleware
 
-        // ✅ 1. Find the assignment
-        const assignment = await deliveryAssignmentModel.findById(assignmentId);
-        
-        if (!assignment) {
-            return res.status(404).json({
-                success: false,
-                message: "Assignment not found"
-            });
-        }
+    console.log("📦 Accepting assignment:", { assignmentId, agentId });
 
-        // ✅ 2. Check if assignment is still broadcasted
-        if (assignment.status !== "broadcasted") {
-            return res.status(400).json({
-                success: false,
-                message: "Assignment already accepted by another agent"
-            });
-        }
+    // ✅ 1. Find the assignment
+    const assignment = await deliveryAssignmentModel.findById(assignmentId);
 
-        // ✅ 3. Check if agent is already busy with another order
-        const alreadyAssigned = await deliveryAssignmentModel.findOne({
-            assignedTo: agentId,
-            status: { $nin: ["broadcasted", "Delivered"] }
-        });
-
-        if (alreadyAssigned) {
-            return res.status(400).json({
-                success: false,
-                message: "You are already assigned to another order"
-            });
-        }
-
-        // ✅ 4. Assign to this agent
-        assignment.assignedTo = agentId;
-        assignment.status = "Assigned";
-        await assignment.save();
-
-        // ✅ 5. Update agent availability
-        await deliveryAgentModel.findByIdAndUpdate(agentId, {
-            isAvailable: false,
-            currentOrderId: assignment.order
-        });
-
-        // ✅ 6. Update order status to "Picked Up"
-        await orderModel.findByIdAndUpdate(assignment.order, {
-            status: "Out for delivery",
-            assignedDeliveryBoy: agentId,
-            acceptedAt:new Date(),
-            availableAgents: []
-        });
-
-  // ✅ NEW: Notify all other agents that this order is no longer available
-        const io = req.app.get('io');
-        const otherAgentIds = assignment.broadCastedTo.filter(
-            id => id.toString() !== agentId.toString()
-        );
-
-        for (const otherAgentId of otherAgentIds) {
-            const otherAgent = await deliveryAgentModel.findById(otherAgentId);
-            if (otherAgent && otherAgent.socketId && otherAgent.isOnline) {
-                io.to(otherAgent.socketId).emit('orderAcceptedByOther', {
-                    assignmentId: assignment._id,
-                    orderId: assignment.order,
-                    message: 'This order has been accepted by another agent'
-                });
-                console.log(`📢 Notified agent ${otherAgent.name} that order was taken`);
-            }
-        }
-
-          // ✅ Notify admin
-        const admin = await adminModel.findOne({ isOnline: true });
-        if (admin && admin.socketId) {
-            const populatedOrder = await orderModel
-                .findById(assignment.order)
-                .populate('assignedDeliveryBoy', 'name phone email');
-
-            io.to(admin.socketId).emit('orderAssigned', {
-                orderId: assignment.order,
-                order: populatedOrder,
-                agentId: agentId,
-                message: 'Order has been assigned'
-            });
-            console.log(`📢 Notified admin that order was assigned`);
-        }
-
-console.log("✅ Assignment accepted successfully");
-       return res.status(200).json({
-            success: true,
-            message: "Assignment accepted successfully",
-            assignmentId: assignment._id
-        });
-
-    } catch (error) {
-        console.error("❌ Accept assignment error:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Failed to accept assignment"
-        });
+    if (!assignment) {
+      return res.status(404).json({
+        success: false,
+        message: "Assignment not found"
+      });
     }
+
+    // ✅ 2. Check if assignment is still broadcasted
+    if (assignment.status !== "broadcasted") {
+      return res.status(400).json({
+        success: false,
+        message: "Assignment already accepted by another agent"
+      });
+    }
+
+    // ✅ 3. Check if agent is already busy with another order
+    const alreadyAssigned = await deliveryAssignmentModel.findOne({
+      assignedTo: agentId,
+      status: { $nin: ["broadcasted", "Delivered"] }
+    });
+
+    if (alreadyAssigned) {
+      return res.status(400).json({
+        success: false,
+        message: "You are already assigned to another order"
+      });
+    }
+
+    // ✅ 4. Assign to this agent
+    assignment.assignedTo = agentId;
+    assignment.status = "Assigned";
+    await assignment.save();
+
+    // ✅ 5. Update agent availability
+    await deliveryAgentModel.findByIdAndUpdate(agentId, {
+      isAvailable: false,
+      currentOrderId: assignment.order
+    });
+
+    // ✅ 6. Update order status to "Picked Up"
+    await orderModel.findByIdAndUpdate(assignment.order, {
+      status: "Out for delivery",
+      assignedDeliveryBoy: agentId,
+      acceptedAt: new Date(),
+      availableAgents: []
+    });
+
+    // ✅ NEW: Notify all other agents that this order is no longer available
+    const io = req.app.get('io');
+    const otherAgentIds = assignment.broadCastedTo.filter(
+      id => id.toString() !== agentId.toString()
+    );
+
+    for (const otherAgentId of otherAgentIds) {
+      const otherAgent = await deliveryAgentModel.findById(otherAgentId);
+      if (otherAgent && otherAgent.socketId && otherAgent.isOnline) {
+        io.to(otherAgent.socketId).emit('orderAcceptedByOther', {
+          assignmentId: assignment._id,
+          orderId: assignment.order,
+          message: 'This order has been accepted by another agent'
+        });
+        console.log(`📢 Notified agent ${otherAgent.name} that order was taken`);
+      }
+    }
+
+    // ✅ Notify admin
+    const admin = await adminModel.findOne({ isOnline: true });
+    if (admin && admin.socketId) {
+      const populatedOrder = await orderModel
+        .findById(assignment.order)
+        .populate('assignedDeliveryBoy', 'name phone email');
+
+      io.to(admin.socketId).emit('orderAssigned', {
+        orderId: assignment.order,
+        order: populatedOrder,
+        agentId: agentId,
+        message: 'Order has been assigned'
+      });
+      console.log(`📢 Notified admin that order was assigned`);
+    }
+
+    console.log("✅ Assignment accepted successfully");
+    return res.status(200).json({
+      success: true,
+      message: "Assignment accepted successfully",
+      assignmentId: assignment._id
+    });
+
+  } catch (error) {
+    console.error("❌ Accept assignment error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to accept assignment"
+    });
+  }
 };
 
 export const getCurrentAssignment = async (req, res) => {
-    try {
-        const agentId = req.body.agentId;
-        
-        console.log("📦 Fetching current assignment for agent:", agentId);
+  try {
+    const agentId = req.body.agentId;
 
-        const assignment = await deliveryAssignmentModel
-            .findOne({
-                assignedTo: agentId,
-                status: "Assigned"
-            })
-            .populate("order")
-            .populate("assignedTo", "name email phone location");
+    console.log("📦 Fetching current assignment for agent:", agentId);
 
-        // ✅ No assignment is not an error - return null
-        if (!assignment) {
-            console.log("ℹ️ No active assignment for agent");
-            return res.status(200).json({
-                success: true,
-                assignment: null,
-                deliveryAgentLocation: null,
-                UserLocation: null,
-                message: "No active assignment"
-            });
-        }
+    const assignment = await deliveryAssignmentModel
+      .findOne({
+        assignedTo: agentId,
+        status: "Assigned"
+      })
+      .populate("order")
+      .populate("assignedTo", "name email phone location");
 
-        // ✅ Check if order exists
-        if (!assignment.order) {
-            console.warn("⚠️ Assignment has no order");
-            return res.status(400).json({
-                success: false,
-                message: 'Order not found for this assignment'
-            });
-        }
-
-        console.log("✅ Found active assignment:", assignment._id);
-
-        // Extract locations
-        let deliveryAgentLocation = { lat: null, lon: null };
-        if (assignment.assignedTo?.location?.coordinates?.length === 2) {
-            deliveryAgentLocation.lat = assignment.assignedTo.location.coordinates[1];
-            deliveryAgentLocation.lon = assignment.assignedTo.location.coordinates[0];
-        }
-
-        let UserLocation = { lat: null, lon: null };
-        if (assignment.order?.address) {
-            UserLocation.lat = assignment.order.address.latitude;
-            UserLocation.lon = assignment.order.address.longitude;
-        }
-
-        return res.status(200).json({
-            success: true,
-            assignment,
-            deliveryAgentLocation,
-            UserLocation
-        });
-
-    } catch (error) {
-        console.error("❌ Get assignment error:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Failed to get assignment data"
-        });
+    // ✅ No assignment is not an error - return null
+    if (!assignment) {
+      console.log("ℹ️ No active assignment for agent");
+      return res.status(200).json({
+        success: true,
+        assignment: null,
+        deliveryAgentLocation: null,
+        UserLocation: null,
+        message: "No active assignment"
+      });
     }
+
+    // ✅ Check if order exists
+    if (!assignment.order) {
+      console.warn("⚠️ Assignment has no order");
+      return res.status(400).json({
+        success: false,
+        message: 'Order not found for this assignment'
+      });
+    }
+
+    console.log("✅ Found active assignment:", assignment._id);
+
+    // Extract locations
+    let deliveryAgentLocation = { lat: null, lon: null };
+    if (assignment.assignedTo?.location?.coordinates?.length === 2) {
+      deliveryAgentLocation.lat = assignment.assignedTo.location.coordinates[1];
+      deliveryAgentLocation.lon = assignment.assignedTo.location.coordinates[0];
+    }
+
+    let UserLocation = { lat: null, lon: null };
+    if (assignment.order?.address) {
+      UserLocation.lat = assignment.order.address.latitude;
+      UserLocation.lon = assignment.order.address.longitude;
+    }
+
+    return res.status(200).json({
+      success: true,
+      assignment,
+      deliveryAgentLocation,
+      UserLocation
+    });
+
+  } catch (error) {
+    console.error("❌ Get assignment error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get assignment data"
+    });
+  }
 };
 
-export const getOrderById = async(req,res)=>{
+export const getOrderById = async (req, res) => {
   try {
-    const {orderId} = req.params;
+    const { orderId } = req.params;
     const order = await orderModel.findById(orderId)
-    .populate("assignedDeliveryBoy")
-    return res.status(200).json({success:true,data:order});
+      .populate("assignedDeliveryBoy")
+    return res.status(200).json({ success: true, data: order });
   } catch (error) {
-    return res.status(400).json({success:false,message:"Error fetching order data"});
-  } 
+    return res.status(400).json({ success: false, message: "Error fetching order data" });
+  }
 }
 
 // Generate OTP for order delivery
@@ -682,9 +758,9 @@ export const generateOtp = async (req, res) => {
 
     order.deliveryOtp = otp;
     order.otpExpiry = expiry;
-    console.log("fsd",order);
+    console.log("fsd", order);
     await order.save();
-    await sendOtpMail(order.email,otp);
+    await sendOtpMail(order.email, otp);
 
     return res.status(200).json({
       success: true,
@@ -714,18 +790,18 @@ async function broadcastWaitingOrdersToAgent(io, agent) {
         order.address.longitude
       );
 
-      console.log(`📏 Order ${order._id.toString().slice(-6)}: ${(distance/1000).toFixed(2)}km away`);
+      console.log(`📏 Order ${order._id.toString().slice(-6)}: ${(distance / 1000).toFixed(2)}km away`);
 
       if (distance <= 50000) {
         // ✅ Check if assignment exists
-        let assignment = order.assignment 
+        let assignment = order.assignment
           ? await deliveryAssignmentModel.findOne({ order: order._id, status: 'broadcasted' })
           : null;
 
         // ✅ CREATE assignment if it doesn't exist
         if (!assignment) {
           console.log(`⚠️ Order ${order._id.toString().slice(-6)} has no assignment - CREATING one now`);
-          
+
           assignment = await deliveryAssignmentModel.create({
             order: order._id,
             pickup: {
@@ -755,7 +831,7 @@ async function broadcastWaitingOrdersToAgent(io, agent) {
           await order.save();
 
           console.log(`✅ Created assignment ${assignment._id.toString().slice(-6)} for order ${order._id.toString().slice(-6)}`);
-        } 
+        }
         // ✅ Assignment exists - add agent if not already there
         else if (!assignment.broadCastedTo.includes(agent._id.toString())) {
           assignment.broadCastedTo.push(agent._id.toString());
@@ -835,31 +911,31 @@ export const verifyOtp = async (req, res) => {
     console.log("📦 Order found:", order?._id);
 
     if (!order) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "No active order for this agent" 
+      return res.status(404).json({
+        success: false,
+        message: "No active order for this agent"
       });
     }
 
     // 2. Validate OTP
     if (!order.deliveryOtp) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "OTP not generated yet" 
+      return res.status(400).json({
+        success: false,
+        message: "OTP not generated yet"
       });
     }
 
     if (new Date() > order.otpExpiry) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "OTP expired. Please request a new OTP" 
+      return res.status(400).json({
+        success: false,
+        message: "OTP expired. Please request a new OTP"
       });
     }
 
     if (order.deliveryOtp !== otp) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Invalid OTP. Please try again" 
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP. Please try again"
       });
     }
 
@@ -869,7 +945,7 @@ export const verifyOtp = async (req, res) => {
 
     // 4. Update delivery agent stats
     const agent = await deliveryAgentModel.findById(agentId);
-    
+
     if (agent) {
       const lastReset = agent.lastResetDate ? new Date(agent.lastResetDate) : null;
       const shouldReset = !lastReset || lastReset < todayStart;
@@ -884,7 +960,7 @@ export const verifyOtp = async (req, res) => {
       agent.totalDeliveries = (agent.totalDeliveries || 0) + 1;
       agent.isAvailable = true;
       agent.currentOrderId = null;
-      
+
       await agent.save();
       console.log("✅ Agent updated:", {
         todayDeliveries: agent.todayDeliveries,
@@ -929,9 +1005,9 @@ export const verifyOtp = async (req, res) => {
       });
       console.log(`📢 Notified admin about order ${order._id} delivery`);
     }
- // ✅ NEW: Notify USER (customer) about delivery completion
+    // ✅ NEW: Notify USER (customer) about delivery completion
     const customer = await userModel.findById(order.user);
-    
+
     if (customer && customer.socketId && customer.isOnline) {
       io.to(customer.socketId).emit('orderDelivered', {
         orderId: order._id.toString(),
@@ -946,21 +1022,21 @@ export const verifyOtp = async (req, res) => {
     if (agent && agent.isAvailable && agent.isOnline) {
       await broadcastWaitingOrdersToAgent(io, agent);
     }
-// In verifyOtp function, after broadcastWaitingOrdersToAgent
+    // In verifyOtp function, after broadcastWaitingOrdersToAgent
 
-// ✅ Notify agent to refresh assignments
-if (agent && agent.socketId && agent.isOnline) {
-  console.log(`📢 Notifying agent ${agent.name} to check for new orders`);
-  
-  io.to(agent.socketId).emit('deliveryCompleted', {
-    message: 'Delivery completed! Checking for new orders...',
-    agentId: agent._id,
-    todayDeliveries: agent.todayDeliveries,
-    totalDeliveries: agent.totalDeliveries
-  });
-  
-  console.log(`✅ Agent ${agent.name} notified to refresh assignments`);
-}
+    // ✅ Notify agent to refresh assignments
+    if (agent && agent.socketId && agent.isOnline) {
+      console.log(`📢 Notifying agent ${agent.name} to check for new orders`);
+
+      io.to(agent.socketId).emit('deliveryCompleted', {
+        message: 'Delivery completed! Checking for new orders...',
+        agentId: agent._id,
+        todayDeliveries: agent.todayDeliveries,
+        totalDeliveries: agent.totalDeliveries
+      });
+
+      console.log(`✅ Agent ${agent.name} notified to refresh assignments`);
+    }
 
     // 10. Send success response
     return res.status(200).json({
@@ -981,9 +1057,9 @@ if (agent && agent.socketId && agent.isOnline) {
 
   } catch (error) {
     console.error("❌ Error verifying OTP:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Server error while verifying OTP" 
+    res.status(500).json({
+      success: false,
+      message: "Server error while verifying OTP"
     });
   }
 };
