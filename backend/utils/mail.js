@@ -12,16 +12,18 @@ const transporter = nodemailer.createTransport({
     pass: process.env.PASS, // App password from Google Account
   },
   tls: {
-    rejectUnauthorized: true // Enforce SSL/TLS certificate validation
+    rejectUnauthorized: false // Allow self-signed certificates for better delivery
   },
   pool: true, // Use pooled connections
-  maxConnections: 3, // Reduced for better stability
-  maxMessages: 10, // Reduced for better reliability
-  rateDelta: 2000, // Increased delay between messages
-  rateLimit: 3, // Reduced rate limit
-  connectionTimeout: 10000, // 10 seconds
-  socketTimeout: 15000, // 15 seconds
-  greetingTimeout: 5000 // 5 seconds
+  maxConnections: 5, // Increased for better throughput
+  maxMessages: 20, // Increased for better reliability
+  rateDelta: 1000, // 1 second delay between messages
+  rateLimit: 5, // 5 emails per rateDelta
+  connectionTimeout: 15000, // 15 seconds
+  socketTimeout: 20000, // 20 seconds
+  greetingTimeout: 10000, // 10 seconds
+  logger: true, // Enable logging
+  debug: process.env.NODE_ENV !== 'production' // Debug in development
 });
 
 // Verify transporter connection
@@ -48,18 +50,8 @@ export const sendOtpMail = async (to, otp) => {
   console.log(`📧 Initiating email send to: ${to}`);
 
   try {
-    // Verify SMTP connection first
-    await new Promise((resolve, reject) => {
-      transporter.verify((error, success) => {
-        if (error) {
-          console.error('❌ SMTP Verification failed:', error);
-          reject(new Error('SMTP connection error'));
-        } else {
-          console.log('✅ SMTP connection verified');
-          resolve(success);
-        }
-      });
-    });
+    // Skip SMTP verification in retry logic - it's already done at startup
+    console.log('📧 Proceeding with email send...');
 
     const emailTemplate = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #ffffff;">
@@ -77,8 +69,8 @@ export const sendOtpMail = async (to, otp) => {
     `;
 
     // Set retry options with exponential backoff
-    const maxRetries = 2; // Reduced retries for faster response
-    const baseDelay = 2000; // 2 seconds base delay
+    const maxRetries = 3; // Increased retries for better delivery
+    const baseDelay = 1500; // 1.5 seconds base delay
     let attempt = 1;
     let lastError = null;
 
@@ -96,22 +88,19 @@ export const sendOtpMail = async (to, otp) => {
             to,
             subject: "Your Food Delivery OTP",
             html: emailTemplate,
+            text: `Your Food Delivery OTP is: ${otp}. This code will expire in 5 minutes. Do not share this OTP with anyone.`, // Plain text fallback
             headers: {
               'priority': 'high',
-              'x-delivery-attempt': attempt.toString()
+              'x-delivery-attempt': attempt.toString(),
+              'X-Priority': '1',
+              'Importance': 'high'
             },
             priority: 'high',
-            dsn: {
-              id: `${Date.now()}`,
-              return: 'headers',
-              notify: ['failure', 'delay'],
-              recipient: process.env.EMAIL
-            },
             disableFileAccess: true,
             disableUrlAccess: true
           }),
           new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Email send timeout')), 15000) // 15 second timeout
+            setTimeout(() => reject(new Error('Email send timeout')), 20000) // 20 second timeout
           )
         ]);
 
@@ -133,7 +122,7 @@ export const sendOtpMail = async (to, otp) => {
         lastError = error;
 
         if (attempt < maxRetries) {
-          const delay = retryDelay * attempt;
+          const delay = baseDelay * attempt;
           console.log(`⏳ Waiting ${delay}ms before retry...`);
           await new Promise(resolve => setTimeout(resolve, delay));
         }
