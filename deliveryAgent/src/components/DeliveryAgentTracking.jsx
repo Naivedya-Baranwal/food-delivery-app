@@ -461,9 +461,6 @@ const DeliveryAgentTracking = () => {
                       <p className="text-sm font-semibold text-blue-800">
                         OTP sent to customer's email
                       </p>
-                      <p className="text-xs text-blue-600 mt-1">
-                        � {acceptedOrder.order?.email}
-                      </p>
                     </div>
                   </div>
                 </div>
