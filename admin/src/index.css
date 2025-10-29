@@ -28,7 +28,7 @@ hr{
   margin-left: 0%;
   margin-top: 60px; /* Navbar height */
   height: calc(100vh - 60px);
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 .flex-col{

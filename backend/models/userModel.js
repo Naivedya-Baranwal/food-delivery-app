@@ -6,8 +6,8 @@ const userSchema = new mongoose.Schema({
     phone : {type : String , required : true, unique : true},
     password : {type : String , required : true},
     cartData : {type : Object , default:{}},
-    socketId: {type: String},
-    isOnline:{type:Boolean},
+    socketId: {type: String, default: null},
+    isOnline:{type:Boolean, default:false},
 },{minimize:false,timestamps:true});
 
 const userModel = mongoose.model.user || mongoose.model("user",userSchema);

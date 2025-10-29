@@ -10,7 +10,7 @@ const orderSchema = new mongoose.Schema({
     address:{type:Object,required:true},
     status:{
         type:String,
-        enum:["Pending","Food Processing","Out for delivery","Delivered"],
+        enum:["Pending","Food Processing","Out for delivery","Assigned","Delivered"],
         default:"Pending"
     },
     date:{type:Date,default:Date.now()},
@@ -19,10 +19,27 @@ const orderSchema = new mongoose.Schema({
         ref:"deliveryAssignment",
         default:null
     },
+    assignedDeliveryBoy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "deliveryAgent",
+    default:null
+  },
+  acceptedAt:{
+    type:Date,
+    default:null
+  },
+  deliveredAt:{
+    type:Date,
+    default:null
+  },
     payment:{type:Boolean,default:false},
     paymentMethod: { type: String, enum: ["Online", "COD"], default: "Online" },
-    deliveryOTP: { type: String, default: null },
-    otpExpiry: { type: Date, default: null }
+    deliveryOtp: { type: String, default: null },
+    otpExpiry: { type: Date, default: null },
+    availableAgents: {
+      type: Array,
+      default: []
+    }
 },{ timestamps: true })
 
 const orderModel = mongoose.models.order || mongoose.model("order",orderSchema);

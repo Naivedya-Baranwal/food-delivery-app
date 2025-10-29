@@ -1,0 +1,631 @@
+/* OrderTracking.css - Modern Purple-Blue Theme */
+
+/* Page Container */
+.order-tracking-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f3e7ff 0%, #ffffff 50%, #e0f2fe 100%);
+  padding: 24px;
+  padding-top: 94px;
+}
+
+.order-tracking-wrapper {
+  max-width: 1400px;
+  width: 72%;
+  margin: 0 auto;
+}
+
+/* Header Section */
+.tracking-header-section {
+  margin-bottom: 32px;
+}
+
+.back-btn-tracking {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #4b5563;
+  font-weight: 500;
+  padding: 8px 16px;
+  border: none;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.back-btn-tracking:hover {
+  background: #f3f4f6;
+  color: #8b5cf6;
+}
+
+.back-btn-tracking svg {
+  width: 20px;
+  height: 20px;
+}
+
+.page-title {
+  font-size: 32px;
+  font-weight: bold;
+  background: linear-gradient(to right, #8b5cf6, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.order-id-subtitle {
+  color: #6b7280;
+  font-size: 16px;
+  text-align: center;
+}
+
+/* Loading and Error States */
+.loading-container,
+.error-container,
+.no-order-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f3e7ff 0%, #ffffff 50%, #e0f2fe 100%);
+}
+
+.loading-content,
+.error-content {
+  text-align: center;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid #e5e7eb;
+  border-top-color: #8b5cf6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #6b7280;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.error-text {
+  color: #dc2626;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.retry-button {
+  margin-top: 16px;
+  padding: 12px 32px;
+  background: linear-gradient(to right, #8b5cf6, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.3);
+}
+
+.retry-button:hover {
+  background: linear-gradient(to right, #7c3aed, #2563eb);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px -1px rgba(139, 92, 246, 0.4);
+}
+
+/* Tracking Card */
+.tracking-card {
+  background-color: white;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  border: 1px solid #ddd6fe;
+}
+
+/* Delivered Success Banner */
+.delivered-success-banner {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+}
+
+.delivered-content-center {
+  text-align: center;
+  padding: 20px;
+}
+
+.delivered-emoji {
+  font-size: 80px;
+  margin-bottom: 16px;
+}
+
+.delivered-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.delivered-message {
+  font-size: 16px;
+  opacity: 0.95;
+  margin-bottom: 8px;
+}
+
+.delivered-timestamp {
+  font-size: 14px;
+  margin-top: 12px;
+  opacity: 0.85;
+  background: rgba(255,255,255,0.2);
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+/* Card Header */
+.card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #1f2937;
+  margin: 0;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.status-delivered {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-delivered .status-dot {
+  background: #10b981;
+}
+
+.status-assigned {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.status-assigned .status-dot {
+  background: #3b82f6;
+}
+
+.status-out-for-delivery {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-out-for-delivery .status-dot {
+  background: #f59e0b;
+}
+
+.status-default {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.status-default .status-dot {
+  background: #6b7280;
+}
+
+/* Live Indicator */
+.live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.live-pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+/* Overview Single Line */
+.overview-single-line {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 24px;
+  background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+  border-radius: 12px;
+}
+
+.overview-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.overview-label {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.overview-value {
+  font-size: 20px;
+  color: #1f2937;
+  font-weight: bold;
+}
+
+.overview-amount {
+  font-size: 32px;
+  color: #10b981;
+}
+
+.overview-divider {
+  width: 2px;
+  height: 50px;
+  background: linear-gradient(to bottom, transparent, #d1d5db, transparent);
+}
+
+/* Map Container */
+.map-container {
+  height: 500px;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 16px;
+  border: 2px solid #ddd6fe;
+}
+
+.map-placeholder {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+}
+
+.placeholder-content {
+  text-align: center;
+  padding: 40px;
+}
+
+.placeholder-emoji {
+  font-size: 80px;
+  margin-bottom: 20px;
+}
+
+.placeholder-title {
+  color: #4b5563;
+  font-size: 20px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.placeholder-subtitle {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+/* Tracking Info Banner */
+.tracking-info-banner {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border-radius: 12px;
+  border: 2px solid #bfdbfe;
+}
+
+.banner-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pulse-dot {
+  width: 12px;
+  height: 12px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.agent-name-text {
+  font-weight: 500;
+  color: #1e3a8a;
+  display: block;
+  font-size: 16px;
+}
+
+.distance-text {
+  font-size: 13px;
+  color: #3b82f6;
+  display: block;
+  margin-top: 4px;
+}
+
+.update-frequency {
+  font-size: 14px;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+/* Agent Not Ready Banner */
+.agent-not-ready-banner {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-radius: 12px;
+  border: 2px solid #fcd34d;
+}
+
+.banner-icon {
+  font-size: 32px;
+}
+
+.banner-text {
+  flex: 1;
+}
+
+.banner-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #92400e;
+  margin: 0 0 4px 0;
+}
+
+.banner-subtitle {
+  font-size: 14px;
+  color: #b45309;
+  margin: 0;
+}
+
+/* Grid Two Columns */
+.grid-two-col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+/* Delivery Details - Simplified */
+.delivery-details-simple {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-row-simple {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+}
+
+.detail-icon-large {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.detail-text-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detail-label-small {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value-large {
+  font-size: 16px;
+  color: #1f2937;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* Order Items List */
+.order-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.order-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 12px;
+}
+
+.item-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+}
+
+.item-quantity {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.item-price {
+  font-weight: bold;
+  font-size: 16px;
+  color: #10b981;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 2px solid #d1d5db;
+  margin-top: 8px;
+}
+
+.total-label {
+  font-weight: bold;
+  font-size: 16px;
+  color: #1f2937;
+}
+
+.total-amount {
+  font-weight: bold;
+  font-size: 24px;
+  color: #8b5cf6;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .order-tracking-wrapper {
+    width: 95%;
+  }
+
+  .grid-two-col {
+    grid-template-columns: 1fr;
+  }
+
+  .overview-single-line {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .overview-divider {
+    width: 80%;
+    height: 2px;
+  }
+}
+
+@media (max-width: 768px) {
+  .order-tracking-container {
+    padding: 16px;
+    padding-top: 84px;
+  }
+
+  .order-tracking-wrapper {
+    width: 100%;
+  }
+
+  .page-title {
+    font-size: 24px;
+  }
+
+  .delivered-emoji {
+    font-size: 60px;
+  }
+
+  .delivered-title {
+    font-size: 22px;
+  }
+
+  .tracking-card {
+    padding: 20px;
+  }
+
+  .card-header-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .map-container {
+    height: 400px;
+  }
+
+  .tracking-info-banner {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 20px;
+  }
+
+  .overview-value {
+    font-size: 18px;
+  }
+
+  .overview-amount {
+    font-size: 26px;
+  }
+
+  .map-container {
+    height: 300px;
+  }
+
+  .detail-value-large {
+    font-size: 14px;
+  }
+
+  .total-amount {
+    font-size: 20px;
+  }
+}

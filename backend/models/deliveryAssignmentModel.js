@@ -29,15 +29,10 @@ const deliveryAssignmentModelSchema = new mongoose.Schema({
   }],
   status: {
     type: String,
-    enum: ["broadcasted","Assigned", "Picked Up", "Delivered"],
+    enum: ["broadcasted","Assigned"],
     default: "broadcasted"
   },
-  acceptedAt:{
-    type:Date,
-    default:null
-  },
   estimatedDeliveryTime: { type: Date, default: null }, 
-  deliveredAt: { type: Date, default: null }  
 }, { timestamps: true });
 
 const deliveryAssignmentModel =

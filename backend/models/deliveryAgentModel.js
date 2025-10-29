@@ -11,9 +11,11 @@ const deliveryAgentSchema = new mongoose.Schema({
   },
   isAvailable: { type: Boolean, default: true },
   isOnline: { type: Boolean, default: false },
+  socketId: { type: String, default: null },
   currentOrderId: { type: String, default: null },
   todayDeliveries: { type: Number, default: 0 },
-  totalDeliveries: { type: Number, default: 0 }
+  totalDeliveries: { type: Number, default: 0 },
+  lastResetDate: { type: Date, default: () => new Date().setHours(0, 0, 0, 0) } 
 }, { timestamps: true });
 
 deliveryAgentSchema.index({ location: '2dsphere' });

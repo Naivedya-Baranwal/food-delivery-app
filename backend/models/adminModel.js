@@ -15,7 +15,9 @@ const adminSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
-    }
+    },
+    socketId: { type: String, default: null },   
+    isOnline: { type: Boolean, default: false }
 }, { timestamps: true });
 
 const adminModel = mongoose.model.admin || mongoose.model('admin', adminSchema);

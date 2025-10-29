@@ -1,4 +1,4 @@
-.navbar {
+/* .navbar {
   position: fixed;
   top: 0;
   left: 0;
@@ -100,4 +100,251 @@
   width: 40px;
   border-radius: 50%;
   cursor: pointer;
-} */
+} */ 
+ /* Navbar.css - Modern Design */
+
+/* Navbar Container */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: white;
+  z-index: 1000;
+  border-bottom: 2px solid #ddd6fe;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Logo - Left */
+.navbar-logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.navbar-logo {
+  height: 45px;
+  width: auto;
+  transition: transform 0.2s ease;
+}
+
+.navbar-logo:hover {
+  transform: scale(1.05);
+}
+
+/* Center Navigation */
+.navbar-center {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.nav-link-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-link-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.nav-link-btn:hover {
+  background: linear-gradient(135deg, #f3e7ff, #ddd6fe);
+  color: #7c3aed;
+}
+
+/* Right Actions */
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Profile Section */
+.profile-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 12px;
+  background: linear-gradient(135deg, #f3e7ff, #ddd6fe);
+  border-radius: 24px;
+}
+
+.profile-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid white;
+  object-fit: cover;
+}
+
+.profile-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #7c3aed;
+}
+
+/* Logout Button */
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: linear-gradient(to right, #ef4444, #dc2626);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+.logout-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.logout-btn:hover {
+  background: linear-gradient(to right, #dc2626, #b91c1c);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(239, 68, 68, 0.4);
+}
+
+/* Login Button */
+.login-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: linear-gradient(to right, #8b5cf6, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
+}
+
+.login-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.login-btn:hover {
+  background: linear-gradient(to right, #7c3aed, #2563eb);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(139, 92, 246, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .navbar {
+    padding: 0 2%;
+  }
+
+  .navbar-center {
+    gap: 4px;
+  }
+
+  .nav-link-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .nav-link-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    height: 60px;
+    padding: 0 10px;
+  }
+
+  .navbar-logo {
+    height: 35px;
+  }
+
+  /* Hide text on mobile, keep icons */
+  .navbar-center {
+    gap: 2px;
+  }
+
+  .nav-link-btn {
+    padding: 8px;
+  }
+
+  .nav-link-btn span {
+    display: none;
+  }
+
+  .profile-name {
+    display: none;
+  }
+
+  .profile-img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .logout-btn,
+  .login-btn {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  .logout-btn span,
+  .login-btn span {
+    display: none;
+  }
+
+  .navbar-actions {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    height: 55px;
+  }
+
+  .navbar-logo {
+    height: 30px;
+  }
+
+  .navbar-center {
+    display: none; /* Hide nav links on very small screens */
+  }
+
+  .profile-section {
+    padding: 6px 10px;
+  }
+
+  .profile-img {
+    width: 28px;
+    height: 28px;
+  }
+}
+

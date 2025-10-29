@@ -1,5 +1,4 @@
 import Navbar from './components/Navbar/Navbar'
-import Sidebar from './components/Sidebar/Sidebar'
 import { Route, Routes } from 'react-router-dom'
 import Add from './pages/Add/Add'
 import List from './pages/List/List'
@@ -7,13 +6,13 @@ import Orders from './pages/Orders/Orders'
 import Dashboard from './pages/Dashboard/Dashboard'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useState, useEffect } from 'react'
+import { useEffect,useContext } from 'react'
 import AdminLoginPopup from './components/LoginPopup/LoginPopup'
 import axios from '../utils/credentials'
+import { AdminContext } from '../src/context/AdminContext.jsx'
 
 const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
+  const { isLoggedIn, setIsLoggedIn, showLogin, setShowLogin } = useContext(AdminContext);
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -40,7 +39,7 @@ const App = () => {
           minHeight: '70vh',
           padding: '20px',
           width: '100%',
-          marginBottom: '180px'
+          marginBottom: '180px' 
         }}>
           <div style={{
             backgroundColor: '#fff',
@@ -109,15 +108,10 @@ const App = () => {
       <Navbar
         isLoggedIn={isLoggedIn}
         setShowLogin={setShowLogin}
-        setIsLoggedIn={setIsLoggedIn}
       />
-      {showLogin ? <AdminLoginPopup
-        setShowLogin={setShowLogin}
-        setIsLoggedIn={setIsLoggedIn}
-      /> : <></>}
+      {showLogin ? <AdminLoginPopup/> : <></>}
       <hr />
       <div className="app-content">
-        <Sidebar isLoggedIn={isLoggedIn} setShowLogin={setShowLogin} />
         <Routes>
           <Route path="/add" element={renderProtectedRoute(<Add />)} />
           <Route path="/list" element={renderProtectedRoute(<List />)} />

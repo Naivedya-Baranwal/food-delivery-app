@@ -11,6 +11,7 @@ import http from "http";
 import { Server } from "socket.io";
 import { socketHandler } from "./socket.js";
 import deliveryRouter from "./routes/deliveryRoute.js";
+import {resetDailyDeliveries} from "./utils/scheduledTasks.js"
 
 // app config
 const app = express();
@@ -22,7 +23,7 @@ const io = new Server(server,{
         methods:["GET","POST"]
     }
 })
-app.set("socketio",io);
+app.set("io",io);
 
 const port = process.env.PORT || 4000;
 
@@ -34,6 +35,9 @@ app.use(cors());
 socketHandler(io);
 // db connection
 connectDB();
+
+// Initialize scheduled tasks
+resetDailyDeliveries();
 
 // api endpoints
 app.use("/api/food",foodRouter);
