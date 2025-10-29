@@ -745,30 +745,97 @@ export const generateOtp = async (req, res) => {
   const { orderId } = req.body;
 
   try {
-    const order = await orderModel.findById(orderId);
+    console.log(`🔄 Generating OTP for order: ${orderId}`);
+
+    // Validate orderId
+    if (!orderId) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Order ID is required" 
+      });
+    }
+
+    // Find order with timeout
+    const order = await Promise.race([
+      orderModel.findById(orderId),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database timeout')), 5000)
+      )
+    ]);
+
     if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res.status(404).json({ 
+        success: false, 
+        message: "Order not found" 
+      });
+    }
+
+    if (!order.email) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Order has no associated email address" 
+      });
     }
 
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // Set expiry time (5 minutes from now)
     const expiry = new Date(Date.now() + 5 * 60 * 1000);
 
+    // Update order first
     order.deliveryOtp = otp;
     order.otpExpiry = expiry;
-    console.log("fsd", order);
-    await order.save();
-    await sendOtpMail(order.email, otp);
 
-    return res.status(200).json({
-      success: true,
-      message: "OTP generated successfully",
-    });
+    try {
+      await Promise.race([
+        order.save(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Save timeout')), 5000)
+        )
+      ]);
+
+      console.log(`✅ OTP saved for order: ${orderId}`);
+
+      // Try to send email with timeout
+      try {
+        await Promise.race([
+          sendOtpMail(order.email, otp),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Email timeout')), 10000)
+          )
+        ]);
+
+        console.log(`✅ OTP email sent to: ${order.email}`);
+        
+        return res.status(200).json({
+          success: true,
+          message: "OTP generated and sent successfully",
+          email: order.email
+        });
+      } catch (emailError) {
+        console.error("❌ Error sending OTP email:", emailError);
+        
+        // Return success even if email fails (OTP is saved)
+        return res.status(200).json({
+          success: true,
+          message: "OTP generated but email delivery failed. Check order status or try again.",
+          email: order.email
+        });
+      }
+    } catch (saveError) {
+      console.error("❌ Error saving OTP:", saveError);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Failed to save OTP" 
+      });
+    }
   } catch (error) {
-    console.error("Error generating OTP:", error);
-    return res.status(500).json({ success: false, message: "Server error" });
+    console.error("❌ Error generating OTP:", error);
+    return res.status(500).json({ 
+      success: false, 
+      message: error.message === 'Database timeout' 
+        ? "Server is taking too long to respond. Please try again."
+        : "Error generating OTP"
+    });
   }
 };
 
