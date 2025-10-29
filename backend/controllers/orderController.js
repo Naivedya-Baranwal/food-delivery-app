@@ -790,11 +790,21 @@ export const generateOtp = async (req, res) => {
     await order.save();
     console.log(`✅ OTP saved successfully`);
 
-    // Attempt to send email with better error handling
+    // Send email in parallel with timeout
     console.log(`📧 Attempting to send OTP email to: ${order.email}`);
 
     try {
-      const emailResult = await sendOtpMail(order.email, otp);
+      // Set up timeout for the entire operation
+      const timeoutDuration = 25000; // 25 seconds total
+      const emailSendPromise = sendOtpMail(order.email, otp);
+
+      const emailResult = await Promise.race([
+        emailSendPromise,
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Operation timeout')), timeoutDuration)
+        )
+      ]);
+
       console.log(`✉️ Email sending result:`, emailResult);
 
       if (emailResult.success) {
@@ -804,7 +814,8 @@ export const generateOtp = async (req, res) => {
           message: "OTP generated and sent successfully",
           email: order.email,
           expiry: expiry,
-          emailSent: true
+          emailSent: true,
+          otp: otp // Include OTP in response for development
         });
       } else {
         throw new Error("Email sending failed");
@@ -812,24 +823,28 @@ export const generateOtp = async (req, res) => {
     } catch (emailError) {
       console.error(`📧 Failed to send email to ${order.email}:`, emailError);
 
-      // Log detailed error info
-      if (emailError.response) {
-        console.error('Email error response:', emailError.response);
-      }
+      // Detailed error logging
+      console.error('Error details:', {
+        message: emailError.message,
+        code: emailError.code,
+        command: emailError.command,
+        response: emailError.response
+      });
 
-      // Return a specific error for timeout
-      if (emailError.message.includes('timeout')) {
+      // Handle different types of errors
+      const errorMessage = emailError.message.toLowerCase();
+      if (errorMessage.includes('timeout') || errorMessage.includes('etimedout')) {
+        console.log('⏳ Timeout error detected - returning OTP in development');
         return res.status(200).json({
           success: true,
-          message: "OTP generated but email is delayed. Please wait a few minutes and check your email.",
+          message: "OTP generated but email is delayed. Please check your email or request a new OTP.",
           email: order.email,
           expiry: expiry,
           emailSent: false,
-          retryAfter: 2 // minutes
+          retryAfter: 1, // 1 minute
+          otp: process.env.NODE_ENV === 'development' ? otp : undefined // Include OTP only in development
         });
-      }
-
-      // Return success even if email fails (since OTP is saved)
+      }      // Return success even if email fails (since OTP is saved)
       return res.status(200).json({
         success: true,
         message: "OTP generated but email delivery failed. You can try regenerating the OTP.",

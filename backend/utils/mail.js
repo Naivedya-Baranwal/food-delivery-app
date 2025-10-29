@@ -15,10 +15,13 @@ const transporter = nodemailer.createTransport({
     rejectUnauthorized: true // Enforce SSL/TLS certificate validation
   },
   pool: true, // Use pooled connections
-  maxConnections: 5, // Maximum number of simultaneous connections
-  maxMessages: 100, // Maximum number of messages per connection
-  rateDelta: 1000, // How many milliseconds between messages
-  rateLimit: 5 // Maximum number of messages per rateDelta
+  maxConnections: 3, // Reduced for better stability
+  maxMessages: 10, // Reduced for better reliability
+  rateDelta: 2000, // Increased delay between messages
+  rateLimit: 3, // Reduced rate limit
+  connectionTimeout: 10000, // 10 seconds
+  socketTimeout: 15000, // 15 seconds
+  greetingTimeout: 5000 // 5 seconds
 });
 
 // Verify transporter connection
@@ -73,9 +76,9 @@ export const sendOtpMail = async (to, otp) => {
     </div>
     `;
 
-    // Set retry options
-    const maxRetries = 3;
-    const retryDelay = 1000; // 1 second
+    // Set retry options with exponential backoff
+    const maxRetries = 2; // Reduced retries for faster response
+    const baseDelay = 2000; // 2 seconds base delay
     let attempt = 1;
     let lastError = null;
 
@@ -83,22 +86,34 @@ export const sendOtpMail = async (to, otp) => {
       try {
         console.log(`📧 Attempt ${attempt} of ${maxRetries} to send email`);
 
-        const info = await transporter.sendMail({
-          from: {
-            name: "Food Delivery Service",
-            address: process.env.EMAIL
-          },
-          to,
-          subject: "Your Food Delivery OTP",
-          html: emailTemplate,
-          headers: {
-            'priority': 'high',
-            'x-delivery-attempt': attempt.toString()
-          },
-          priority: 'high',
-          disableFileAccess: true, // Security: Disable file attachments
-          disableUrlAccess: true // Security: Disable remote content
-        });
+        // Use Promise.race to implement timeout
+        const info = await Promise.race([
+          transporter.sendMail({
+            from: {
+              name: "Food Delivery Service",
+              address: process.env.EMAIL
+            },
+            to,
+            subject: "Your Food Delivery OTP",
+            html: emailTemplate,
+            headers: {
+              'priority': 'high',
+              'x-delivery-attempt': attempt.toString()
+            },
+            priority: 'high',
+            dsn: {
+              id: `${Date.now()}`,
+              return: 'headers',
+              notify: ['failure', 'delay'],
+              recipient: process.env.EMAIL
+            },
+            disableFileAccess: true,
+            disableUrlAccess: true
+          }),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Email send timeout')), 15000) // 15 second timeout
+          )
+        ]);
 
         console.log(`✅ Email sent successfully on attempt ${attempt}`);
         console.log('📧 Message ID:', info.messageId);
