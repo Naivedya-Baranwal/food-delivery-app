@@ -37,7 +37,7 @@ const homeIcon = new L.icon({
 // Auto-fit bounds component
 function AutoFitBounds({ agentPos, customerPos }) {
   const map = useMap();
-  
+
   useEffect(() => {
     if (agentPos && customerPos) {
       const bounds = L.latLngBounds([agentPos, customerPos]);
@@ -47,7 +47,7 @@ function AutoFitBounds({ agentPos, customerPos }) {
       });
     }
   }, [agentPos, customerPos, map]);
-  
+
   return null;
 }
 
@@ -65,12 +65,12 @@ function ChangeView({ center, zoom }) {
 const DeliveryAgentTracking = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
-  const { 
-    deliveryAgentLocation, 
-    UserLocation, 
+
+  const {
+    deliveryAgentLocation,
+    UserLocation,
     acceptedOrder,
-    loadingData 
+    loadingData
   } = useSelector(state => state.delivery);
 
   const [mapReady, setMapReady] = useState(false);
@@ -98,31 +98,31 @@ const DeliveryAgentTracking = () => {
   // Calculate distance
   const distance = useMemo(() => {
     if (!hasAllLocations) return null;
-    
+
     const R = 6371;
     const dLat = (userLocationLat - deliveryAgentLat) * Math.PI / 180;
     const dLon = (userLocationLon - deliveryAgentLon) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(deliveryAgentLat * Math.PI / 180) * Math.cos(userLocationLat * Math.PI / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const d = R * c;
-    
+
     return d < 1 ? `${Math.round(d * 1000)} m` : `${d.toFixed(1)} km`;
   }, [hasAllLocations, deliveryAgentLat, deliveryAgentLon, userLocationLat, userLocationLon]);
 
   // Define center
-  const center = hasAgentLocation 
+  const center = hasAgentLocation
     ? [deliveryAgentLat, deliveryAgentLon]
     : [19.0760, 72.8777];
 
   // Define path for route
-  const path = hasAllLocations 
+  const path = hasAllLocations
     ? [
-        [deliveryAgentLat, deliveryAgentLon],
-        [userLocationLat, userLocationLon]
-      ]
+      [deliveryAgentLat, deliveryAgentLon],
+      [userLocationLat, userLocationLon]
+    ]
     : null;
 
   // Open navigation
@@ -136,11 +136,11 @@ const DeliveryAgentTracking = () => {
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     if (isMobile) {
-      const url = isIOS 
+      const url = isIOS
         ? `maps://maps.apple.com/?daddr=${userLocationLat},${userLocationLon}`
         : `google.navigation:q=${userLocationLat},${userLocationLon}`;
       window.location.href = url;
-      
+
       setTimeout(() => {
         window.open(`https://www.google.com/maps/dir/?api=1&destination=${userLocationLat},${userLocationLon}`, '_blank');
       }, 2000);
@@ -154,7 +154,7 @@ const DeliveryAgentTracking = () => {
     setGeneratingOtp(true);
     try {
       const res = await axios.post("/api/order/generateOtp", { orderId });
-      
+
       if (res.data.success) {
         setShowOtpBox(true);
         toast.success(showOtpBox ? "New OTP sent! 📨" : "OTP sent to customer! 📨");
@@ -181,7 +181,7 @@ const DeliveryAgentTracking = () => {
       const res = await axios.post("/api/order/verifyOtp", {
         otp: enteredOtp,
       });
-      
+
       if (res.data.success) {
         toast.success("Order delivered successfully! ✅");
         setShowOtpBox(false);
@@ -228,7 +228,7 @@ const DeliveryAgentTracking = () => {
           </div>
           <p className="text-gray-800 text-xl font-bold mb-2">No Active Delivery</p>
           <p className="text-gray-500 mb-6">Accept an order from the dashboard to start tracking</p>
-          <button 
+          <button
             onClick={() => navigate('/')}
             className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-semibold hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-lg"
           >
@@ -349,36 +349,36 @@ const DeliveryAgentTracking = () => {
 
           <div className="h-[500px]">
             {hasAgentLocation ? (
-              <MapContainer 
-                center={center} 
-                zoom={14} 
+              <MapContainer
+                center={center}
+                zoom={14}
                 className="h-full w-full"
                 whenReady={() => setMapReady(true)}
                 key={`${deliveryAgentLat}-${deliveryAgentLon}`}
               >
-                <TileLayer 
+                <TileLayer
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 />
-                
+
                 {hasAgentLocation && (
-                  <Marker 
-                    position={[deliveryAgentLat, deliveryAgentLon]} 
+                  <Marker
+                    position={[deliveryAgentLat, deliveryAgentLon]}
                     icon={deliveryBoyIcon}
                   />
                 )}
 
                 {hasUserLocation && (
-                  <Marker 
-                    position={[userLocationLat, userLocationLon]} 
+                  <Marker
+                    position={[userLocationLat, userLocationLon]}
                     icon={homeIcon}
                   />
                 )}
 
                 {path && (
-                  <Polyline 
-                    positions={path} 
-                    color="#F97316" 
+                  <Polyline
+                    positions={path}
+                    color="#F97316"
                     weight={5}
                     opacity={0.8}
                     dashArray="10, 10"
@@ -386,8 +386,8 @@ const DeliveryAgentTracking = () => {
                 )}
 
                 {hasAllLocations ? (
-                  <AutoFitBounds 
-                    agentPos={[deliveryAgentLat, deliveryAgentLon]} 
+                  <AutoFitBounds
+                    agentPos={[deliveryAgentLat, deliveryAgentLon]}
                     customerPos={[userLocationLat, userLocationLon]}
                   />
                 ) : (
@@ -429,7 +429,7 @@ const DeliveryAgentTracking = () => {
               // Initial "Mark as Delivered" button
               <div className="w-full max-w-md text-center">
                 <h3 className="text-lg font-bold text-gray-800 mb-4">Ready to Complete Delivery?</h3>
-                <button 
+                <button
                   className="w-full bg-gradient-to-r cursor-pointer from-amber-400 to-amber-500 text-white py-4 rounded-xl font-bold hover:from-amber-500 hover:to-amber-600 transition-all duration-200 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 flex items-center justify-center text-lg"
                   onClick={() => handleMarkAsDelivered(acceptedOrder.order?._id)}
                   disabled={generatingOtp}
@@ -459,10 +459,10 @@ const DeliveryAgentTracking = () => {
                     </svg>
                     <div className="flex-1">
                       <p className="text-sm font-semibold text-blue-800">
-                        OTP sent to customer's phone
+                        OTP sent to customer's email
                       </p>
                       <p className="text-xs text-blue-600 mt-1">
-                        📞 {acceptedOrder.order?.phone}
+                        � {acceptedOrder.order?.email}
                       </p>
                     </div>
                   </div>
@@ -471,8 +471,8 @@ const DeliveryAgentTracking = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Enter 6-Digit OTP</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       placeholder="● ● ● ● ● ●"
                       className="w-full border-2 border-gray-300 p-4 rounded-xl text-center text-2xl tracking-[1em] font-bold focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition"
                       onChange={(e) => setEnteredOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
@@ -485,7 +485,7 @@ const DeliveryAgentTracking = () => {
 
                   <div className="flex gap-3">
                     {/* Verify Button */}
-                    <button 
+                    <button
                       className="flex-1 bg-gradient-to-r from-green-500 to-green-600 py-4 text-white rounded-xl font-bold hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed flex items-center justify-center"
                       onClick={handleVerifyOtp}
                       disabled={verifyingOtp || enteredOtp.length !== 6}
@@ -506,7 +506,7 @@ const DeliveryAgentTracking = () => {
                     </button>
 
                     {/* Cancel Button */}
-                    <button 
+                    <button
                       className="px-6 py-4 bg-gray-200 hover:bg-gray-300 rounded-xl font-semibold transition-all duration-200 disabled:cursor-not-allowed"
                       onClick={handleCancelOtp}
                       disabled={verifyingOtp}
@@ -517,7 +517,7 @@ const DeliveryAgentTracking = () => {
 
                   {/* Resend OTP */}
                   <div className="text-center pt-2">
-                    <button 
+                    <button
                       className="text-sm text-orange-600 hover:text-orange-800 font-semibold underline disabled:text-gray-400 disabled:no-underline transition"
                       onClick={() => handleMarkAsDelivered(acceptedOrder.order?._id)}
                       disabled={generatingOtp || verifyingOtp}
